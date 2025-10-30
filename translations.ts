@@ -37,13 +37,8 @@ export const translations: Record<Language, Record<string, string>> = {
     file_preview: 'معاينة الملف:',
     video_preview: 'معاينة الفيديو:',
     unsupported_file: 'نوع الملف غير مدعوم',
-    file_too_large: 'حجم الملف كبير جدًا. الحد الأقصى 5 ميجابايت.',
-    upload_tab: 'رفع ملف',
-    url_tab: 'لصق رابط',
-    url_placeholder: 'أدخل رابط الفيديو هنا...',
-    fetching_video: 'جاري جلب الفيديو...',
-    fetch_error: 'فشل جلب الفيديو. قد يكون السبب مشكلة في الشبكة أو قيود CORS. حاول رفع الملف مباشرة.',
-    invalid_url: 'الرابط غير صالح.',
+    file_too_large: 'حجم الملف كبير جدًا. الحد الأقصى {size} ميجابايت.',
+    max_file_size: 'الحد الأقصى للحجم: {size} ميجابايت',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} أدوات ذكية. جميع الحقوق محفوظة.`,
@@ -93,13 +88,8 @@ export const translations: Record<Language, Record<string, string>> = {
     file_preview: 'File Preview:',
     video_preview: 'Video Preview:',
     unsupported_file: 'Unsupported file type',
-    file_too_large: 'File is too large. Max size is 5MB.',
-    upload_tab: 'Upload File',
-    url_tab: 'Paste URL',
-    url_placeholder: 'Enter video URL here...',
-    fetching_video: 'Fetching video...',
-    fetch_error: 'Failed to fetch video. This may be a network issue or CORS restriction. Try uploading the file directly.',
-    invalid_url: 'Invalid URL.',
+    file_too_large: 'File is too large. Max size is {size}MB.',
+    max_file_size: 'Max file size: {size}MB',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} Smart Tools. All rights reserved.`,
