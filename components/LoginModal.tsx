@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { CloseIcon } from './icons/ActionIcons';
-import { MOCK_USERS } from '../constants';
-import type { User, Language } from '../types';
+import { auth, googleProvider } from '../services/firebase';
+import { signInWithPopup, AuthError } from 'firebase/auth';
+import type { Language } from '../types';
+import { Spinner } from './icons/Spinner';
 
 interface LoginModalProps {
   onClose: () => void;
-  onLogin: (user: User) => void;
   t: Record<string, string>;
   language: Language;
 }
@@ -24,15 +25,23 @@ const GoogleIcon = () => (
     </svg>
 );
 
-const UserPlusIcon = () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-);
+export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t, language }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, t, language }) => {
-  const [view, setView] = useState<'initial' | 'account-chooser'>('initial');
-
-  const handleAccountSelect = (user: User) => {
-    onLogin(user);
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      onClose();
+    } catch (err) {
+      const authError = err as AuthError;
+      console.error("Firebase Auth Error:", authError);
+      setError(t.login_error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -41,59 +50,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onLogin, t, lan
       onClick={onClose}
     >
       <div 
-        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 max-w-sm w-full mx-4 shadow-2xl animate-fade-in-up transform transition-all min-h-[350px]"
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl p-6 sm:p-8 max-w-sm w-full mx-4 shadow-2xl animate-fade-in-up transform transition-all min-h-[300px]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-            {view === 'initial' ? t.login_modal_title : t.login_choose_account}
+            {t.login_modal_title}
           </h2>
           <button onClick={onClose} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-black/10 dark:hover:bg-white/10 transition-colors" aria-label={t.close}>
             <CloseIcon />
           </button>
         </div>
 
-        {view === 'initial' && (
-            <div className="text-center animate-fade-in">
-                <p className="text-gray-600 dark:text-gray-300 mb-8">{t.login_modal_subtitle}</p>
-                <button
-                    onClick={() => setView('account-chooser')}
-                    className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out border border-gray-300 dark:border-gray-600"
-                >
-                    <GoogleIcon />
-                    <span>{t.login_with_google}</span>
-                </button>
-                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">
-                    {t.login_modal_disclaimer}
-                </p>
-            </div>
-        )}
-
-        {view === 'account-chooser' && (
-             <div className="space-y-3 animate-fade-in">
-                {MOCK_USERS.map(user => (
-                    <button 
-                        key={user.email} 
-                        onClick={() => handleAccountSelect(user)}
-                        className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left"
-                    >
-                        <img src={user.photoURL} alt={user.name[language]} className="w-10 h-10 rounded-full" />
-                        <div>
-                            <p className="font-semibold text-gray-800 dark:text-white">{user.name[language]}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
-                        </div>
-                    </button>
-                ))}
-                <button className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-left text-gray-600 dark:text-gray-300">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-600">
-                        <UserPlusIcon />
-                    </div>
-                    <div>
-                        <p className="font-semibold">{t.login_use_another_account}</p>
-                    </div>
-                </button>
-            </div>
-        )}
+        <div className="text-center animate-fade-in">
+            <p className="text-gray-600 dark:text-gray-300 mb-8">{t.login_modal_subtitle}</p>
+            <button
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out border border-gray-300 dark:border-gray-600 disabled:opacity-50"
+            >
+                {isLoading ? <Spinner /> : <GoogleIcon />}
+                <span>{t.login_with_google}</span>
+            </button>
+            {error && (
+                <p className="text-red-500 text-sm mt-4">{error}</p>
+            )}
+        </div>
       </div>
     </div>
   );

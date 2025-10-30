@@ -10,6 +10,7 @@ interface HeaderProps {
   user: User | null;
   onLogin: () => void;
   onLogout: () => void;
+  authInitialized: boolean;
   t: Record<string, string>;
 }
 
@@ -17,7 +18,7 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
   <span className="text-xl">{theme === 'light' ? '🌙' : '☀️'}</span>
 );
 
-export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, t }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, t }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -69,15 +70,22 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
 
             <div className="w-px h-6 bg-white/20 mx-2"></div>
 
-            {user ? (
-              <UserMenu user={user} onLogout={onLogout} t={t} language={language} />
-            ) : (
-              <button
-                onClick={onLogin}
-                className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
-              >
-                {t.login}
-              </button>
+            {!authInitialized && (
+              <div className="w-24 h-9 rounded-full bg-white/20 animate-pulse"></div>
+            )}
+            {authInitialized && (
+              <>
+                {user ? (
+                  <UserMenu user={user} onLogout={onLogout} t={t} language={language} />
+                ) : (
+                  <button
+                    onClick={onLogin}
+                    className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
+                  >
+                    {t.login}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

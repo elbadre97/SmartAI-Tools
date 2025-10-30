@@ -23,24 +23,6 @@ export const CATEGORIES: Category[] = [
   }
 ];
 
-export const MOCK_USERS: User[] = [
-  {
-    name: { ar: 'نورة خالد', en: 'Noura Khalid' },
-    email: 'noura.k@example.com',
-    photoURL: 'https://avatar.iran.liara.run/public/girl?username=noura'
-  },
-  {
-    name: { ar: 'محمد عبدالله', en: 'Mohammed Abdullah' },
-    email: 'mohammed.a@example.com',
-    photoURL: 'https://avatar.iran.liara.run/public/boy?username=mohammed'
-  },
-  {
-    name: { ar: 'فاطمة علي', en: 'Fatima Ali' },
-    email: 'fatima.a@example.com',
-    photoURL: 'https://avatar.iran.liara.run/public/girl?username=fatima'
-  }
-];
-
 export const TOOLS: Tool[] = [
   {
     id: 'text',
