@@ -80,6 +80,17 @@ export const TOOLS: Tool[] = [
     inputType: 'image',
   },
   {
+    id: 'image_prompt_extractor',
+    category: 'visuals',
+    icon: '🔍',
+    title: { ar: 'مستخرج الأوامر من الصور', en: 'Image Prompt Extractor' },
+    description: { ar: 'استخراج وصف نصي (برومبت) من صورة مرفوعة', en: 'Extract a text description (prompt) from an uploaded image' },
+    inputLabel: { ar: 'ارفع صورة لاستخراج البرومبت منها:', en: 'Upload an image to extract the prompt from:' },
+    placeholder: { ar: 'اسحب وأفلت صورة هنا أو انقر للتصفح', en: 'Drag and drop an image here, or click to browse' },
+    loadingText: { ar: 'جاري تحليل الصورة واستخراج البرومبت...', en: 'Analyzing image and extracting prompt...' },
+    inputType: 'image',
+  },
+  {
     id: 'video_bg_remover',
     category: 'visuals',
     icon: '🎞️',

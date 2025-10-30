@@ -11,6 +11,7 @@ export type ToolType =
   | 'image'
   | 'image_bg_remover'
   | 'video_bg_remover'
+  | 'image_prompt_extractor'
   | 'summary'
   | 'translate'
   | 'email'
