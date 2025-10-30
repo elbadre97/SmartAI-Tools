@@ -12,13 +12,31 @@ interface HeaderProps {
   onLogin: () => void;
   onLogout: () => void;
   t: Record<string, string>;
+  authInitialized: boolean;
 }
 
 const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
   <span className="text-xl">{theme === 'light' ? '🌙' : '☀️'}</span>
 );
 
-export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, t }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, t, authInitialized }) => {
+  const renderAuthSection = () => {
+    if (!authInitialized) {
+      return <div className="w-24 h-9 animate-pulse bg-white/20 rounded-full"></div>;
+    }
+    if (user) {
+      return <UserMenu user={user} onLogout={onLogout} t={t} />;
+    }
+    return (
+      <button
+        onClick={onLogin}
+        className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
+      >
+        {t.login}
+      </button>
+    );
+  };
+  
   return (
     <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -45,16 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
 
             <div className="w-px h-6 bg-white/20 mx-2"></div>
 
-            {user ? (
-              <UserMenu user={user} onLogout={onLogout} t={t} />
-            ) : (
-              <button
-                onClick={onLogin}
-                className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
-              >
-                {t.login}
-              </button>
-            )}
+            {renderAuthSection()}
           </div>
         </div>
       </div>

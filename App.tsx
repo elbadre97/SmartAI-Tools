@@ -8,6 +8,14 @@ import { CategoryTabs } from './components/CategoryTabs';
 import { TOOLS, CATEGORIES } from './constants';
 import type { Tool, Language, CategoryType, User } from './types';
 import { translations } from './translations';
+import { auth } from './services/firebase';
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -15,6 +23,7 @@ export default function App() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>(CATEGORIES[0].id);
   const [user, setUser] = useState<User | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -30,6 +39,21 @@ export default function App() {
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser({
+          name: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+        });
+      } else {
+        setUser(null);
+      }
+      setAuthInitialized(true);
+    });
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, []);
 
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'ar' ? 'en' : 'ar'));
@@ -49,16 +73,24 @@ export default function App() {
     setSelectedTool(null);
   };
   
-  const handleLogin = () => {
-    // In a real app, this would involve an auth provider like Firebase or Auth0
-    setUser({
-      name: language === 'ar' ? 'علي أحمد' : 'Ali Ahmed',
-      photoURL: `https://avatar.iran.liara.run/public/boy?username=ali`
-    });
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle setting the user state
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      alert(language === 'ar' ? 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.' : 'Login failed. Please try again.');
+    }
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // onAuthStateChanged will handle setting user state to null
+    } catch (error) {
+      console.error("Sign out failed:", error);
+    }
   };
 
   const t = translations[language];
@@ -76,6 +108,7 @@ export default function App() {
         onLogin={handleLogin}
         onLogout={handleLogout}
         t={t}
+        authInitialized={authInitialized}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="text-center mb-10 md:mb-16">

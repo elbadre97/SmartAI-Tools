@@ -6,8 +6,8 @@ export type InputType = 'text' | 'image';
 export type LocalizedString = Record<Language, string>;
 
 export interface User {
-  name: string;
-  photoURL: string;
+  name: string | null;
+  photoURL: string | null;
 }
 
 export interface Category {
