@@ -44,6 +44,8 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const [sizeInfo, setSizeInfo] = useState<{ original: number; compressed: number } | null>(null);
 
   const isFileInputTool = tool.inputType === 'image' || tool.inputType === 'file';
+  const imageOutputTools = ['image', 'image_bg_remover', 'file_converter', 'file_compressor'];
+  const isImageOutput = imageOutputTools.includes(tool.id);
 
   useEffect(() => {
     setInputText('');
@@ -180,7 +182,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 }
                 image.src = objectUrl;
             });
-        } else if (tool.inputType === 'image') { // Specifically for bg remover
+        } else if (tool.inputType === 'image') { // Specifically for bg remover & prompt extractor
             if (!uploadedFile) {
                 setError(t.image_required_error);
                 setIsLoading(false);
@@ -230,7 +232,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const copyResult = () => navigator.clipboard.writeText(outputText);
 
   const saveResult = () => {
-    if(outputText.startsWith('data:image')) {
+    if(isImageOutput && outputText.startsWith('data:image')) {
         const a = document.createElement('a');
         a.href = outputText;
         
@@ -269,7 +271,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     if (navigator.share) {
       navigator.share({
         title: `Result from ${tool.title[language]}`,
-        text: (tool.inputType === 'image' || tool.id === 'image' || tool.id === 'file_converter' || tool.id === 'file_compressor') ? `Image processed with SmartAI Tools` : outputText,
+        text: isImageOutput ? `Image processed with SmartAI Tools` : outputText,
       }).catch(err => console.error("Share failed:", err));
     } else {
       alert(t.share_not_supported);
@@ -442,14 +444,14 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 </div>
             )}
             <div className="bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 min-h-32 text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words overflow-x-auto flex justify-center items-center">
-                {(tool.id === 'image' || tool.inputType === 'image' || tool.id === 'file_converter' || tool.id === 'file_compressor') ? (
+                {isImageOutput ? (
                     <img src={outputText} alt={tool.id === 'file_converter' ? t.converted_image_alt : (tool.id === 'file_compressor' ? t.compressed_image_alt : t.generated_ai_alt)} className="rounded-lg max-w-full h-auto mx-auto shadow-md" />
                 ) : (
                     <code className="text-sm md:text-base">{outputText}</code>
                 )}
             </div>
             <div className="flex flex-wrap gap-3 mt-4">
-                {!outputText.startsWith('data:image') && <button onClick={copyResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"><CopyIcon /> {t.copy_result}</button>}
+                {!isImageOutput && <button onClick={copyResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"><CopyIcon /> {t.copy_result}</button>}
                 <button onClick={saveResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition-colors"><SaveIcon /> {t.save}</button>
                 <button onClick={shareResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-medium transition-colors"><ShareIcon /> {t.share}</button>
             </div>
