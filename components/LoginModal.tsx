@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../services/firebase";
 import { CloseIcon } from './icons/ActionIcons';
-import { auth, googleProvider } from '../services/firebase';
-import { signInWithPopup, AuthError } from 'firebase/auth';
 import type { Language } from '../types';
 import { Spinner } from './icons/Spinner';
+import { auth } from "../services/firebase";
+
 
 interface LoginModalProps {
   onClose: () => void;
