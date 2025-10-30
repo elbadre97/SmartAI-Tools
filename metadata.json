@@ -1,0 +1,5 @@
+{
+  "name": "SmartAI Tools",
+  "description": "An integrated AI platform in Arabic that provides a suite of tools for content creation, including text generation, image creation, summarization, translation, email composition, and code generation, all powered by the Gemini API.",
+  "requestFramePermissions": []
+}
