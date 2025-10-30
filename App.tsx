@@ -10,7 +10,7 @@ import { TOOLS, CATEGORIES } from './constants';
 import type { Tool, Language, CategoryType, User } from './types';
 import { translations } from './translations';
 import { auth } from './services/firebase';
-import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -41,7 +41,7 @@ export default function App() {
 
   useEffect(() => {
     // Only set up the auth state listener if Firebase Auth was initialized successfully
-    if (isAuthEnabled) {
+    if (isAuthEnabled && auth) {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
         if (firebaseUser) {
           const appUser: User = {
@@ -95,7 +95,7 @@ export default function App() {
 
   const handleLogout = async () => {
     // Only attempt to sign out if auth is enabled
-    if (!isAuthEnabled) return;
+    if (!isAuthEnabled || !auth) return;
     try {
       await signOut(auth);
     } catch (error) {

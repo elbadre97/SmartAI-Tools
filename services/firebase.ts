@@ -1,10 +1,9 @@
 // services/firebase.ts
-
-// FIX: Switched from incorrect namespace imports to the correct named imports for Firebase v9, resolving module resolution errors.
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported } from "firebase/analytics";
+// FIX: Changed to namespace imports for firebase/app and firebase/analytics to resolve module export errors. This can happen with certain environment or bundler configurations.
+import * as firebaseApp from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import * as firebaseAnalytics from "firebase/analytics";
 
 // ✅ إعدادات تطبيقك من Firebase Console
 const firebaseConfig = {
@@ -17,20 +16,28 @@ const firebaseConfig = {
   measurementId: "G-5R64B9Y7WH"
 };
 
-// ✅ تهيئة التطبيق
-const app = initializeApp(firebaseConfig);
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let analytics: firebaseAnalytics.Analytics | null = null;
 
-// ✅ تفعيل خدمات Firebase
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Initialize Firebase and services in a try-catch block to gracefully handle
+// potential configuration errors, allowing the app to run without Firebase features.
+try {
+  const app = firebaseApp.getApps().length === 0 ? firebaseApp.initializeApp(firebaseConfig) : firebaseApp.getApp();
+  
+  auth = getAuth(app);
+  db = getFirestore(app);
 
-// ✅ تفعيل التحليلات (analytics) فقط إذا كانت مدعومة
-let analytics: any = null;
-if (typeof window !== "undefined") {
-  isSupported().then((supported) => {
-    if (supported) analytics = getAnalytics(app);
-  });
+  if (typeof window !== "undefined") {
+    firebaseAnalytics.isSupported().then((supported) => {
+      if (supported) {
+        analytics = firebaseAnalytics.getAnalytics(app);
+      }
+    });
+  }
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+  // App will continue with `auth` as null, disabling Firebase-dependent features.
 }
 
-export { analytics };
-export default app;
+export { auth, db, analytics };

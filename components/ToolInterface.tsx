@@ -42,6 +42,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const [compressionQuality, setCompressionQuality] = useState(0.8);
   const [compressorFormat, setCompressorFormat] = useState('jpeg');
   const [sizeInfo, setSizeInfo] = useState<{ original: number; compressed: number } | null>(null);
+  const [downloadLinks, setDownloadLinks] = useState<{ url: string; text: string; }[]>([]);
 
   const isFileInputTool = tool.inputType === 'image' || tool.inputType === 'file';
   const imageOutputTools = ['image', 'image_bg_remover', 'file_converter', 'file_compressor'];
@@ -59,6 +60,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     setCompressionQuality(0.8);
     setCompressorFormat('jpeg');
     setSizeInfo(null);
+    setDownloadLinks([]);
   }, [tool]);
 
   useEffect(() => {
@@ -100,10 +102,55 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     setError(null);
     setIsLoading(true);
     setSizeInfo(null);
+    setDownloadLinks([]);
 
     try {
         let result: string;
-        if (tool.id === 'file_compressor') {
+        if (tool.id === 'video_downloader') {
+            if (!inputText.trim() || !inputText.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
+                setError(language === 'ar' ? 'الرجاء إدخال رابط يوتيوب صالح.' : 'Please enter a valid YouTube URL.');
+                setIsLoading(false);
+                return;
+            }
+
+            const response = await fetch('https://co.wuk.sh/api/json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: inputText,
+                    isNoTTWatermark: true,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(language === 'ar' ? 'فشل في جلب بيانات الفيديو.' : 'Failed to fetch video data.');
+            }
+
+            const data = await response.json();
+            
+            if (data.status === 'error') {
+                 throw new Error(data.text || (language === 'ar' ? 'حدث خطأ غير معروف.' : 'An unknown error occurred.'));
+            }
+
+            if (data.status === 'stream') {
+                setDownloadLinks([{ url: data.url, text: language === 'ar' ? 'تحميل الفيديو' : 'Download Video' }]);
+            } else if (data.status === 'picker') {
+                const links = data.picker.map((item: any) => ({
+                    url: item.url,
+                    text: item.type === 'video' 
+                        ? `${item.quality} - ${language === 'ar' ? 'فيديو' : 'Video'}`
+                        : `${item.format} - ${language === 'ar' ? 'صوت فقط' : 'Audio Only'}`
+                }));
+                setDownloadLinks(links);
+            } else {
+                 throw new Error(language === 'ar' ? 'تم استلام استجابة غير متوقعة من الخادم.' : 'Received an unexpected response from the server.');
+            }
+            setOutputText(language === 'ar' ? 'روابط التحميل جاهزة!' : 'Download links are ready!');
+        }
+        else if (tool.id === 'file_compressor') {
             if (!uploadedFile) {
                 setError(t.file_required_error);
                 setIsLoading(false);
@@ -144,6 +191,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 }
                 image.src = objectUrl;
             });
+            setOutputText(result);
         }
         else if (tool.id === 'file_converter') {
             if (!uploadedFile) {
@@ -182,6 +230,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 }
                 image.src = objectUrl;
             });
+            setOutputText(result);
         } else if (tool.inputType === 'image') { // Specifically for bg remover & prompt extractor
             if (!uploadedFile) {
                 setError(t.image_required_error);
@@ -191,6 +240,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
             const base64String = await fileToBase64(uploadedFile);
             const inputData = { data: base64String.split(',')[1], mimeType: uploadedFile.type };
             result = await generateContent(tool.id, inputData, language);
+            setOutputText(result);
         } else {
             if (!inputText.trim()) {
                 setError(t.input_required_error);
@@ -198,8 +248,8 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 return;
             }
             result = await generateContent(tool.id, inputText, language);
+            setOutputText(result);
         }
-        setOutputText(result);
     } catch (e: any) {
         setError(e.message || t.api_error);
     } finally {
@@ -278,7 +328,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     }
   };
 
-  const isActionDisabled = isLoading || tool.id === 'video_downloader';
+  const isActionDisabled = isLoading;
 
   return (
     <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white/30 rounded-2xl p-4 sm:p-6 md:p-8 max-w-4xl mx-auto shadow-2xl animate-fade-in-up">
@@ -395,7 +445,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
           className="flex items-center justify-center gap-2 w-full sm:flex-grow bg-gradient-to-r from-[#FF6B6B] to-[#4ECDC4] text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isLoading ? <Spinner /> : '⚡'}
-          <span>{isLoading ? tool.loadingText[language] : (tool.id === 'file_converter' ? t.convert : (tool.id === 'file_compressor' ? t.compress : t.generate)) }</span>
+          <span>{isLoading ? tool.loadingText[language] : (tool.id === 'file_converter' ? t.convert : (tool.id === 'file_compressor' ? t.compress : (tool.id === 'video_downloader' ? (language === 'ar' ? 'تحضير الروابط' : 'Prepare Links') : t.generate)))}</span>
         </button>
         {!isFileInputTool && (
             <div className="flex gap-3 justify-center">
@@ -405,12 +455,11 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
         )}
       </div>
       
-      {(tool.id === 'video_downloader' || tool.id === 'file_converter' || tool.id === 'file_compressor') && (
+      {(tool.id === 'file_converter' || tool.id === 'file_compressor') && (
         <div className="mb-6 p-4 rounded-lg bg-yellow-100 dark:bg-yellow-800/30 border border-yellow-300 dark:border-yellow-700/50 text-center text-yellow-800 dark:text-yellow-200">
             <p className="font-bold text-lg">💡 {t.feature_update_title}</p>
             <p className="mt-1 text-sm">
-                {tool.id === 'video_downloader' ? t.video_downloader_explanation : 
-                 (tool.id === 'file_converter' ? t.file_converter_explanation : t.file_compressor_explanation)}
+                {tool.id === 'file_converter' ? t.file_converter_explanation : t.file_compressor_explanation}
             </p>
         </div>
       )}
@@ -443,17 +492,33 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                     </div>
                 </div>
             )}
-            <div className="bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 min-h-32 text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words overflow-x-auto flex justify-center items-center">
-                {isImageOutput ? (
-                    <img src={outputText} alt={tool.id === 'file_converter' ? t.converted_image_alt : (tool.id === 'file_compressor' ? t.compressed_image_alt : t.generated_ai_alt)} className="rounded-lg max-w-full h-auto mx-auto shadow-md" />
-                ) : (
-                    <code className="text-sm md:text-base">{outputText}</code>
-                )}
-            </div>
+            {tool.id === 'video_downloader' && downloadLinks.length > 0 ? (
+                 <div className="bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 space-y-3">
+                    {downloadLinks.map((link, index) => (
+                        <a 
+                            key={index} 
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-colors"
+                        >
+                            {link.text}
+                        </a>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-gray-100 dark:bg-gray-900/50 rounded-xl p-4 min-h-32 text-gray-800 dark:text-gray-100 whitespace-pre-wrap break-words overflow-x-auto flex justify-center items-center">
+                    {isImageOutput ? (
+                        <img src={outputText} alt={tool.id === 'file_converter' ? t.converted_image_alt : (tool.id === 'file_compressor' ? t.compressed_image_alt : t.generated_ai_alt)} className="rounded-lg max-w-full h-auto mx-auto shadow-md" />
+                    ) : (
+                        <code className="text-sm md:text-base">{outputText}</code>
+                    )}
+                </div>
+            )}
             <div className="flex flex-wrap gap-3 mt-4">
-                {!isImageOutput && <button onClick={copyResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"><CopyIcon /> {t.copy_result}</button>}
-                <button onClick={saveResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition-colors"><SaveIcon /> {t.save}</button>
-                <button onClick={shareResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-medium transition-colors"><ShareIcon /> {t.share}</button>
+                {tool.id !== 'video_downloader' && !isImageOutput && <button onClick={copyResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors"><CopyIcon /> {t.copy_result}</button>}
+                {tool.id !== 'video_downloader' && <button onClick={saveResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition-colors"><SaveIcon /> {t.save}</button>}
+                {tool.id !== 'video_downloader' && <button onClick={shareResult} className="flex items-center gap-2 py-2 px-4 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-medium transition-colors"><ShareIcon /> {t.share}</button>}
             </div>
         </div>
       )}
