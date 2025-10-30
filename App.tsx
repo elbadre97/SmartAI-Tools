@@ -83,14 +83,15 @@ export default function App() {
           <p className="text-lg sm:text-xl opacity-90 animate-fade-in-up">{t.main_subtitle}</p>
         </div>
 
-        <CategoryTabs 
-          categories={CATEGORIES}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          language={language}
-        />
-
-        <ToolGrid tools={filteredTools} onSelectTool={handleSelectTool} language={language} />
+        <div id="tools-section">
+          <CategoryTabs 
+            categories={CATEGORIES}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            language={language}
+          />
+          <ToolGrid tools={filteredTools} onSelectTool={handleSelectTool} language={language} />
+        </div>
 
         {selectedTool && (
           <div id="tool-interface" className="mt-12">
@@ -98,7 +99,9 @@ export default function App() {
           </div>
         )}
 
-        <Stats t={t} />
+        <div id="features-section" className="mt-16">
+          <Stats t={t} />
+        </div>
       </main>
       <Footer t={t} />
     </div>

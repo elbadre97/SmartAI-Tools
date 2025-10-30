@@ -13,10 +13,10 @@ interface StatsProps {
 
 export const Stats: React.FC<StatsProps> = ({ t }) => {
     return (
-        <div className="text-center mt-16">
+        <div className="text-center">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
-                <StatCard value="10" label={t.stats_tools} />
-                <StatCard value="10+" label={t.stats_categories} />
+                <StatCard value="13" label={t.stats_tools} />
+                <StatCard value="4" label={t.stats_categories} />
                 <StatCard value="99%" label={t.stats_accuracy} />
                 <StatCard value="24/7" label={t.stats_availability} />
             </div>

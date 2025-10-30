@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Language, User } from '../types';
 import { UserMenu } from './UserMenu';
@@ -19,6 +18,24 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
 );
 
 export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, t }) => {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const headerOffset = 80; // Adjusted for sticky header height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -27,6 +44,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
             <div className="text-3xl">🤖</div>
             <h1 className="text-2xl font-bold">{t.header_title}</h1>
           </div>
+          
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 rtl:space-x-reverse font-medium">
+            <button onClick={scrollToTop} className="text-white/90 hover:text-white transition-colors">{t.nav_home}</button>
+            <button onClick={() => scrollToSection('tools-section')} className="text-white/90 hover:text-white transition-colors">{t.nav_tools}</button>
+            <button onClick={() => scrollToSection('features-section')} className="text-white/90 hover:text-white transition-colors">{t.nav_features}</button>
+          </nav>
+
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <button
               onClick={toggleLanguage}
