@@ -3,28 +3,18 @@ import type { ToolType, Language } from '../types';
 
 let ai: GoogleGenAI | null = null;
 
-const getApiKey = (): string | undefined => {
-    try {
-        // Safely access the API key to prevent ReferenceError in browser environments
-        if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-            return process.env.API_KEY;
-        }
-    } catch (e) {
-        console.error("Could not access process.env.API_KEY", e);
-    }
-    return undefined;
-};
-
-const getAiInstance = (lang: Language): GoogleGenAI | null => {
+const getAiInstance = (): GoogleGenAI => {
     if (ai) {
         return ai;
     }
-    const API_KEY = getApiKey();
-    if (!API_KEY) {
-        // The error will be handled in the generateContent function
-        return null;
+    // As per the guidelines, the API key must be obtained exclusively from `process.env.API_KEY`.
+    // We assume this variable is pre-configured and accessible.
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        // This error will be caught and handled gracefully in the `generateContent` function.
+        throw new Error("API_KEY_NOT_FOUND");
     }
-    ai = new GoogleGenAI({ apiKey: API_KEY });
+    ai = new GoogleGenAI({ apiKey });
     return ai;
 }
 
@@ -60,15 +50,9 @@ const getPromptForTool = (toolType: ToolType, input: string, lang: Language): st
 };
 
 export const generateContent = async (toolType: ToolType, input: string | { data: string; mimeType: string }, lang: Language): Promise<string> => {
-  const aiInstance = getAiInstance(lang);
-  if (!aiInstance) {
-      // Return a user-friendly error instead of crashing the app
-      return lang === 'ar'
-        ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
-        : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
-  }
-
   try {
+    const aiInstance = getAiInstance();
+
     if (toolType === 'image') {
        // Imagen performs better with English prompts.
       const imagePrompt = `A vivid, high-quality image of: ${input}`;
@@ -160,6 +144,11 @@ export const generateContent = async (toolType: ToolType, input: string | { data
     }
   } catch (error) {
     console.error("Error calling Gemini API:", error);
+    if (error instanceof Error && error.message === "API_KEY_NOT_FOUND") {
+        return lang === 'ar'
+          ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
+          : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
+    }
     return lang === 'ar'
       ? "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى."
       : "An error occurred while contacting the AI. Please try again.";
