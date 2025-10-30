@@ -1,9 +1,9 @@
 // services/firebase.ts
-// FIX: Changed to namespace imports for firebase/app and firebase/analytics to resolve module export errors. This can happen with certain environment or bundler configurations.
-import * as firebaseApp from "firebase/app";
+// FIX: Changed to named imports for firebase/app to resolve module export errors.
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
-import * as firebaseAnalytics from "firebase/analytics";
+// import * as firebaseAnalytics from "firebase/analytics";
 
 // ✅ إعدادات تطبيقك من Firebase Console
 const firebaseConfig = {
@@ -18,16 +18,18 @@ const firebaseConfig = {
 
 let auth: Auth | null = null;
 let db: Firestore | null = null;
-let analytics: firebaseAnalytics.Analytics | null = null;
+// let analytics: firebaseAnalytics.Analytics | null = null;
 
 // Initialize Firebase and services in a try-catch block to gracefully handle
 // potential configuration errors, allowing the app to run without Firebase features.
 try {
-  const app = firebaseApp.getApps().length === 0 ? firebaseApp.initializeApp(firebaseConfig) : firebaseApp.getApp();
+  // FIX: Use named imports directly instead of via a namespace.
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   
   auth = getAuth(app);
   db = getFirestore(app);
 
+  /*
   if (typeof window !== "undefined") {
     firebaseAnalytics.isSupported().then((supported) => {
       if (supported) {
@@ -35,9 +37,10 @@ try {
       }
     });
   }
+  */
 } catch (error) {
   console.error("Firebase initialization failed:", error);
   // App will continue with `auth` as null, disabling Firebase-dependent features.
 }
 
-export { auth, db, analytics };
+export { auth, db };
