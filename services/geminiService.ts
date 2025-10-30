@@ -1,14 +1,25 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { ToolType, Language } from '../types';
 
-// Lazily initialize the GoogleGenAI instance to avoid crashing on startup
 let ai: GoogleGenAI | null = null;
+
+const getApiKey = (): string | undefined => {
+    try {
+        // Safely access the API key to prevent ReferenceError in browser environments
+        if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+            return process.env.API_KEY;
+        }
+    } catch (e) {
+        console.error("Could not access process.env.API_KEY", e);
+    }
+    return undefined;
+};
 
 const getAiInstance = (lang: Language): GoogleGenAI | null => {
     if (ai) {
         return ai;
     }
-    const API_KEY = process.env.API_KEY;
+    const API_KEY = getApiKey();
     if (!API_KEY) {
         // The error will be handled in the generateContent function
         return null;
