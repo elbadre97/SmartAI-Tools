@@ -4,6 +4,8 @@ export type Language = 'ar' | 'en';
 
 export type CategoryType = 'content' | 'visuals' | 'productivity' | 'development';
 
+export type AppMode = 'free' | 'trial' | 'user_api' | 'premium';
+
 export type ToolType =
   | 'text'
   | 'long_video_script'
@@ -26,9 +28,16 @@ export type InputType = 'text' | 'image' | 'file';
 export type LocalizedString = Record<Language, string>;
 
 export interface User {
+  uid: string;
   name: LocalizedString;
   email: string;
   photoURL: string;
+  points: number;
+}
+
+export interface UserProfileData {
+    points: number;
+    lastPointsReset: any; // Using 'any' to accommodate Firestore Timestamp
 }
 
 export interface Category {

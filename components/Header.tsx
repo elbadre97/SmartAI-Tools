@@ -1,6 +1,7 @@
 import React from 'react';
-import type { Language, User } from '../types';
+import type { Language, User, AppMode } from '../types';
 import { UserMenu } from './UserMenu';
+import { ModeSelector } from './ModeSelector';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -13,13 +14,19 @@ interface HeaderProps {
   authInitialized: boolean;
   isAuthEnabled: boolean;
   t: Record<string, string>;
+  mode: AppMode;
+  onModeChange: (mode: AppMode) => void;
+  userApiKey: string | null;
 }
 
 const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
   <span className="text-xl">{theme === 'light' ? '🌙' : '☀️'}</span>
 );
 
-export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, isAuthEnabled, t }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, isAuthEnabled, t,
+    mode, onModeChange, userApiKey
+}) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -54,6 +61,24 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
           </nav>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <ModeSelector 
+              mode={mode}
+              onModeChange={onModeChange}
+              language={language}
+              t={t}
+              userApiKey={userApiKey}
+            />
+            
+            {mode === 'trial' && user && (
+              <div 
+                className="bg-white/10 text-sm font-semibold px-3 py-1.5 rounded-full flex items-center gap-2" 
+                title={t.points_remaining.replace('{count}', user.points.toString())}
+              >
+                  <span>💎</span>
+                  <span>{user.points}</span>
+              </div>
+            )}
+
             <button
               onClick={toggleLanguage}
               className="p-2 rounded-full hover:bg-white/20 transition-colors w-10 h-10 flex items-center justify-center"

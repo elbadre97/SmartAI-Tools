@@ -6,11 +6,14 @@ import { Footer } from './components/Footer';
 import { Stats } from './components/Stats';
 import { CategoryTabs } from './components/CategoryTabs';
 import { LoginModal } from './components/LoginModal';
+import { ApiKeyModal } from './components/ApiKeyModal';
 import { TOOLS, CATEGORIES } from './constants';
-import type { Tool, Language, CategoryType, User } from './types';
+import type { Tool, Language, CategoryType, User, AppMode } from './types';
 import { translations } from './translations';
-import { auth } from './services/firebase';
+import { auth, getUserProfile, createUserProfile, deductUserPoint } from './services/firebase';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+
+const USER_API_KEY_STORAGE_KEY = 'smartai-user-api-key';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -20,8 +23,12 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
+  
+  const [mode, setMode] = useState<AppMode>('free');
+  const [userApiKey, setUserApiKey] = useState<string | null>(null);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
 
-  // Determine if authentication is configured and enabled
   const isAuthEnabled = !!auth;
 
   useEffect(() => {
@@ -40,35 +47,95 @@ export default function App() {
   }, [language]);
 
   useEffect(() => {
-    // Only set up the auth state listener if Firebase Auth was initialized successfully
+    try {
+        const storedKey = localStorage.getItem(USER_API_KEY_STORAGE_KEY);
+        if (storedKey) {
+            setUserApiKey(storedKey);
+        }
+    } catch (error) {
+        console.error("Could not read user API key from local storage:", error);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isAuthEnabled && auth) {
-      const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
         if (firebaseUser) {
+          let userProfile = await getUserProfile(firebaseUser.uid);
+          if (!userProfile) {
+            userProfile = await createUserProfile(firebaseUser.uid);
+          }
+          
           const appUser: User = {
-            name: {
-              ar: firebaseUser.displayName || 'مستخدم',
-              en: firebaseUser.displayName || 'User',
-            },
+            uid: firebaseUser.uid,
+            name: { ar: firebaseUser.displayName || 'مستخدم', en: firebaseUser.displayName || 'User' },
             email: firebaseUser.email || '',
             photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
+            points: userProfile.points,
           };
           setUser(appUser);
+          
+          if (pendingMode === 'premium') {
+              setMode('premium');
+              setPendingMode(null);
+          } else if (pendingMode === 'trial' || !pendingMode) {
+              setMode('trial');
+              setPendingMode(null);
+          }
         } else {
           setUser(null);
+          setMode('free'); // Revert to free for guests
         }
         setAuthInitialized(true);
       });
-
       return () => unsubscribe();
     } else {
-      // If auth is not enabled, mark it as initialized and proceed without a user
       setAuthInitialized(true);
       setUser(null);
+      setMode('free');
     }
-  }, [isAuthEnabled]);
+  }, [isAuthEnabled, pendingMode]);
 
-  const toggleLanguage = () => {
-    setLanguage(prev => (prev === 'ar' ? 'en' : 'ar'));
+  const handleSetUserApiKey = (key: string) => {
+    const newKey = key.trim();
+    if (newKey) {
+        setUserApiKey(newKey);
+        localStorage.setItem(USER_API_KEY_STORAGE_KEY, newKey);
+        if (pendingMode === 'user_api') {
+            setMode('user_api');
+            setPendingMode(null);
+        }
+    } else {
+        setUserApiKey(null);
+        localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
+        if (mode === 'user_api') setMode('free');
+    }
+  };
+
+  const handleModeChange = (newMode: AppMode) => {
+    if ((newMode === 'trial' || newMode === 'premium') && !user) {
+        setPendingMode(newMode);
+        setIsLoginModalOpen(true);
+        return;
+    }
+    if (newMode === 'user_api' && !userApiKey) {
+        setPendingMode('user_api');
+        setIsApiKeyModalOpen(true);
+        return;
+    }
+    setMode(newMode);
+    setPendingMode(null);
+  };
+
+  const handleDeductPoint = async () => {
+    if (user && mode === 'trial' && user.points > 0) {
+        try {
+            const newPoints = await deductUserPoint(user.uid, user.points);
+            setUser(prevUser => prevUser ? { ...prevUser, points: newPoints } : null);
+        } catch (error) {
+            console.error("Failed to deduct point:", error);
+        }
+    }
   };
 
   const handleSelectTool = (toolId: string) => {
@@ -81,30 +148,23 @@ export default function App() {
     }
   };
 
-  const handleCloseTool = () => {
-    setSelectedTool(null);
-  };
+  const handleCloseTool = () => setSelectedTool(null);
   
   const handleLogin = () => {
-    // The button that calls this is disabled when auth is not enabled,
-    // so the 'else' block with the alert was unreachable.
-    if (isAuthEnabled) {
-      setIsLoginModalOpen(true);
-    }
+    if (isAuthEnabled) setIsLoginModalOpen(true);
   };
 
   const handleLogout = async () => {
-    // Only attempt to sign out if auth is enabled
     if (!isAuthEnabled || !auth) return;
     try {
       await signOut(auth);
+      // onAuthStateChanged will handle setting user to null and mode to 'free'
     } catch (error) {
       console.error("Error signing out: ", error);
     }
   };
 
   const t = translations[language];
-
   const filteredTools = TOOLS.filter(tool => tool.category === selectedCategory);
 
   return (
@@ -113,13 +173,16 @@ export default function App() {
         theme={theme} 
         toggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
         language={language}
-        toggleLanguage={toggleLanguage}
+        toggleLanguage={() => setLanguage(prev => (prev === 'ar' ? 'en' : 'ar'))}
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
         authInitialized={authInitialized}
         isAuthEnabled={isAuthEnabled}
         t={t}
+        mode={mode}
+        onModeChange={handleModeChange}
+        userApiKey={userApiKey}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="text-center mb-10 md:mb-16">
@@ -139,7 +202,16 @@ export default function App() {
 
         {selectedTool && (
           <div id="tool-interface" className="mt-12">
-            <ToolInterface tool={selectedTool} onClose={handleCloseTool} language={language} t={t} />
+            <ToolInterface 
+                tool={selectedTool} 
+                onClose={handleCloseTool} 
+                language={language} 
+                t={t}
+                mode={mode}
+                userApiKey={userApiKey}
+                user={user}
+                onDeductPoint={handleDeductPoint}
+            />
           </div>
         )}
 
@@ -155,6 +227,17 @@ export default function App() {
           language={language}
         />
       )}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => {
+            setIsApiKeyModalOpen(false);
+            setPendingMode(null);
+        }}
+        onSave={handleSetUserApiKey}
+        currentKey={userApiKey}
+        t={t}
+        language={language}
+      />
     </div>
   );
 }

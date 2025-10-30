@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Tool, Language } from '../types';
+import type { Tool, Language, AppMode, User } from '../types';
 import { generateContent } from '../services/geminiService';
 import { Spinner } from './icons/Spinner';
 import { CloseIcon, CopyIcon, ClearIcon, PasteIcon, UploadIcon } from './icons/ActionIcons';
@@ -9,6 +9,10 @@ interface ToolInterfaceProps {
   onClose: () => void;
   language: Language;
   t: Record<string, string>;
+  mode: AppMode;
+  userApiKey: string | null;
+  user: User | null;
+  onDeductPoint: () => void;
 }
 
 // Define separate limits for different file types to improve user experience and align with API capabilities.
@@ -24,7 +28,7 @@ const mediaFileToBase64 = (file: Blob): Promise<string> => {
     });
 };
 
-export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t }) => {
+export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, mode, userApiKey, user, onDeductPoint }) => {
   const [inputValue, setInputValue] = useState('');
   const [outputValue, setOutputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,6 +97,11 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     if ((isFileInput && !file) || (!isFileInput && !inputValue.trim())) {
       return;
     }
+
+    if (mode === 'trial' && user && user.points <= 0) {
+        setError(t.no_points_error);
+        return;
+    }
     
     setIsLoading(true);
     setError(null);
@@ -103,11 +112,23 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
       let result;
       if (isFileInput && file) {
         const base64Data = await mediaFileToBase64(file);
-        result = await generateContent(tool.id, { data: base64Data, mimeType: file.type }, language);
+        result = await generateContent(tool.id, { data: base64Data, mimeType: file.type }, language, mode, userApiKey);
       } else {
-        result = await generateContent(tool.id, inputValue, language);
+        result = await generateContent(tool.id, inputValue, language, mode, userApiKey);
       }
-      setOutputValue(result);
+      
+      const isErrorResult = result.includes('خطأ') || result.includes('Error') || result.includes('not valid') || result.includes('غير صالح') || result.includes('required');
+
+      if (isErrorResult) {
+          setOutputValue('');
+          setError(result);
+      } else {
+          setOutputValue(result);
+          if (mode === 'trial') {
+              onDeductPoint();
+          }
+      }
+
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred';
       setError(errorMessage);
@@ -179,6 +200,8 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     </div>
   );
 
+  const isButtonDisabled = isLoading || (isFileInput ? !file : !inputValue.trim()) || (mode === 'trial' && user?.points !== undefined && user.points <= 0);
+
   return (
     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up">
       <div className="flex justify-between items-center mb-6">
@@ -219,7 +242,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
 
           <button
             onClick={handleGenerate}
-            disabled={isLoading || (isFileInput ? !file : !inputValue.trim())}
+            disabled={isButtonDisabled}
             className="bg-indigo-500 hover:bg-indigo-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? <Spinner /> : <span>{tool.id === 'video_text_extractor' ? t.extract_text_button : t.generate_button}</span>}

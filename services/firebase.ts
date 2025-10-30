@@ -1,11 +1,9 @@
 // services/firebase.ts
-// FIX: Reverted to a namespace import to work around module resolution issues.
 import * as firebaseApp from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
-// import * as firebaseAnalytics from "firebase/analytics";
+import { getFirestore, type Firestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, type Timestamp } from "firebase/firestore";
+import type { UserProfileData } from '../types';
 
-// ✅ إعدادات تطبيقك من Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyCqewW88AVmKF9vXcf1ytmbHDZglUARC4I",
   authDomain: "smartai-tools.firebaseapp.com",
@@ -18,28 +16,66 @@ const firebaseConfig = {
 
 let auth: Auth | null = null;
 let db: Firestore | null = null;
-// let analytics: firebaseAnalytics.Analytics | null = null;
 
-// Initialize Firebase and services in a try-catch block to gracefully handle
-// potential configuration errors, allowing the app to run without Firebase features.
 try {
   const app = firebaseApp.getApps().length === 0 ? firebaseApp.initializeApp(firebaseConfig) : firebaseApp.getApp();
-  
   auth = getAuth(app);
   db = getFirestore(app);
-
-  /*
-  if (typeof window !== "undefined") {
-    firebaseAnalytics.isSupported().then((supported) => {
-      if (supported) {
-        analytics = firebaseAnalytics.getAnalytics(app);
-      }
-    });
-  }
-  */
 } catch (error) {
   console.error("Firebase initialization failed:", error);
-  // App will continue with `auth` as null, disabling Firebase-dependent features.
 }
+
+// --- User Profile Service Functions ---
+
+const DAILY_POINTS = 30;
+
+const isFromPreviousDay = (timestamp: Timestamp): boolean => {
+    const lastResetDate = timestamp.toDate();
+    const today = new Date();
+    // Reset the time part of 'today' to compare dates only
+    today.setHours(0, 0, 0, 0);
+    lastResetDate.setHours(0, 0, 0, 0);
+    return lastResetDate.getTime() < today.getTime();
+};
+
+export const getUserProfile = async (uid: string): Promise<UserProfileData | null> => {
+    if (!db) return null;
+    const userDocRef = doc(db, 'users', uid);
+    const docSnap = await getDoc(userDocRef);
+    if (docSnap.exists()) {
+        const data = docSnap.data() as UserProfileData;
+        // Check and reset points if the last reset was on a previous day
+        if (data.lastPointsReset && isFromPreviousDay(data.lastPointsReset)) {
+            await updateDoc(userDocRef, {
+                points: DAILY_POINTS,
+                lastPointsReset: serverTimestamp(),
+            });
+            return { ...data, points: DAILY_POINTS, lastPointsReset: new Date() };
+        }
+        return data;
+    } else {
+        return null;
+    }
+};
+
+export const createUserProfile = async (uid: string): Promise<UserProfileData> => {
+    if (!db) throw new Error("Firestore not initialized");
+    const newUserProfile = { // Explicitly define the object shape for setDoc
+        points: DAILY_POINTS,
+        lastPointsReset: serverTimestamp(),
+    };
+    const userDocRef = doc(db, 'users', uid);
+    await setDoc(userDocRef, newUserProfile);
+    // Return a UserProfileData compliant object with a JS Date for local state
+    return { points: DAILY_POINTS, lastPointsReset: new Date() };
+};
+
+export const deductUserPoint = async (uid: string, currentPoints: number): Promise<number> => {
+    if (!db) throw new Error("Firestore not initialized");
+    const newPoints = Math.max(0, currentPoints - 1);
+    const userDocRef = doc(db, 'users', uid);
+    await updateDoc(userDocRef, { points: newPoints });
+    return newPoints;
+};
 
 export { auth, db };

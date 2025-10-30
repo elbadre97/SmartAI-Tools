@@ -1,22 +1,26 @@
 import { GoogleGenAI, Modality } from "@google/genai";
-import type { ToolType, Language } from '../types';
+import type { ToolType, Language, AppMode } from '../types';
 
-let ai: GoogleGenAI | null = null;
 
-const getAiInstance = (): GoogleGenAI => {
-    if (ai) {
-        return ai;
+const getAiInstance = (mode: AppMode, userApiKey?: string | null): GoogleGenAI => {
+    let apiKey: string | undefined;
+
+    if (mode === 'user_api') {
+        apiKey = userApiKey || undefined;
+    } else {
+        // For 'free' and 'premium' modes, use the project's key.
+        // In a real scenario, 'premium' might use a different, more powerful key/model.
+        apiKey = process.env.API_KEY;
     }
-    // As per the guidelines, the API key must be obtained exclusively from `process.env.API_KEY`.
-    // We assume this variable is pre-configured and accessible.
-    const apiKey = process.env.API_KEY;
+
     if (!apiKey) {
-        // This error will be caught and handled gracefully in the `generateContent` function.
+        if (mode === 'user_api') {
+            throw new Error("USER_API_KEY_NOT_FOUND");
+        }
         throw new Error("API_KEY_NOT_FOUND");
     }
-    ai = new GoogleGenAI({ apiKey });
-    return ai;
-}
+    return new GoogleGenAI({ apiKey });
+};
 
 
 const prompts: Record<Language, Partial<Record<ToolType, (input: string) => string>>> = {
@@ -49,9 +53,15 @@ const getPromptForTool = (toolType: ToolType, input: string, lang: Language): st
   return promptFn ? promptFn(input) : input;
 };
 
-export const generateContent = async (toolType: ToolType, input: string | { data: string; mimeType: string }, lang: Language): Promise<string> => {
+export const generateContent = async (
+    toolType: ToolType,
+    input: string | { data: string; mimeType: string },
+    lang: Language,
+    mode: AppMode,
+    userApiKey?: string | null
+): Promise<string> => {
   try {
-    const aiInstance = getAiInstance();
+    const aiInstance = getAiInstance(mode, userApiKey);
 
     if (toolType === 'image') {
        // Imagen performs better with English prompts.
@@ -144,11 +154,24 @@ export const generateContent = async (toolType: ToolType, input: string | { data
     }
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    if (error instanceof Error && error.message === "API_KEY_NOT_FOUND") {
-        return lang === 'ar'
-          ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
-          : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
+    if (error instanceof Error) {
+        if (error.message === "API_KEY_NOT_FOUND") {
+            return lang === 'ar'
+            ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
+            : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
+        }
+        if (error.message === "USER_API_KEY_NOT_FOUND") {
+            return lang === 'ar'
+                ? "مفتاح API الخاص بك مطلوب. يرجى إضافته في إعدادات وضع التشغيل."
+                : "Your API Key is required. Please add it in the mode settings.";
+        }
+        if (error.message.includes('API key not valid')) {
+            return lang === 'ar'
+                ? "مفتاح API الذي أدخلته غير صالح. يرجى التحقق منه والمحاولة مرة أخرى."
+                : "The API key you entered is not valid. Please check it and try again.";
+        }
     }
+
     return lang === 'ar'
       ? "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى المحاولة مرة أخرى."
       : "An error occurred while contacting the AI. Please try again.";
