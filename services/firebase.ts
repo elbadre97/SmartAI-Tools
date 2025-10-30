@@ -1,15 +1,14 @@
 // services/firebase.ts
 
-// FIX: Changed to namespace imports to avoid potential module resolution issues.
-// This preserves the v9+ modular API while being more robust with some build tools.
-import * as firebaseApp from "firebase/app";
-import * as firebaseAuth from "firebase/auth";
-import * as firebaseFirestore from "firebase/firestore";
-import * as firebaseAnalytics from "firebase/analytics";
+// FIX: Switched from incorrect namespace imports to the correct named imports for Firebase v9, resolving module resolution errors.
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 // ✅ إعدادات تطبيقك من Firebase Console
 const firebaseConfig = {
-  apiKey: "AIzaSyDrsQpMlzjcFjUY8YBbikig1EPenBhL8WY",
+  apiKey: "AIzaSyCqewW88AVmKF9vXcf1ytmbHDZglUARC4I",
   authDomain: "smartai-tools.firebaseapp.com",
   projectId: "smartai-tools",
   storageBucket: "smartai-tools.firebasestorage.app",
@@ -19,17 +18,17 @@ const firebaseConfig = {
 };
 
 // ✅ تهيئة التطبيق
-const app = firebaseApp.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // ✅ تفعيل خدمات Firebase
-export const auth = firebaseAuth.getAuth(app);
-export const db = firebaseFirestore.getFirestore(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 
 // ✅ تفعيل التحليلات (analytics) فقط إذا كانت مدعومة
 let analytics: any = null;
 if (typeof window !== "undefined") {
-  firebaseAnalytics.isSupported().then((supported) => {
-    if (supported) analytics = firebaseAnalytics.getAnalytics(app);
+  isSupported().then((supported) => {
+    if (supported) analytics = getAnalytics(app);
   });
 }
 
