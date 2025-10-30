@@ -1,4 +1,3 @@
-
 import type { Language } from './types';
 
 export const translations: Record<Language, Record<string, string>> = {
@@ -25,6 +24,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Tool Interface
     generate_button: 'إنشاء',
+    extract_text_button: 'استخراج النص',
     output_placeholder: 'ستظهر النتيجة هنا...',
     copy_button: 'نسخ',
     copied_button: 'تم النسخ!',
@@ -35,8 +35,15 @@ export const translations: Record<Language, Record<string, string>> = {
     or_drop_file: 'أو اسحبه هنا',
     image_preview: 'معاينة الصورة:',
     file_preview: 'معاينة الملف:',
+    video_preview: 'معاينة الفيديو:',
     unsupported_file: 'نوع الملف غير مدعوم',
     file_too_large: 'حجم الملف كبير جدًا. الحد الأقصى 5 ميجابايت.',
+    upload_tab: 'رفع ملف',
+    url_tab: 'لصق رابط',
+    url_placeholder: 'أدخل رابط الفيديو هنا...',
+    fetching_video: 'جاري جلب الفيديو...',
+    fetch_error: 'فشل جلب الفيديو. قد يكون السبب مشكلة في الشبكة أو قيود CORS. حاول رفع الملف مباشرة.',
+    invalid_url: 'الرابط غير صالح.',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} أدوات ذكية. جميع الحقوق محفوظة.`,
@@ -73,6 +80,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Tool Interface
     generate_button: 'Generate',
+    extract_text_button: 'Extract Text',
     output_placeholder: 'The result will appear here...',
     copy_button: 'Copy',
     copied_button: 'Copied!',
@@ -83,8 +91,15 @@ export const translations: Record<Language, Record<string, string>> = {
     or_drop_file: 'or drag it here',
     image_preview: 'Image Preview:',
     file_preview: 'File Preview:',
+    video_preview: 'Video Preview:',
     unsupported_file: 'Unsupported file type',
     file_too_large: 'File is too large. Max size is 5MB.',
+    upload_tab: 'Upload File',
+    url_tab: 'Paste URL',
+    url_placeholder: 'Enter video URL here...',
+    fetching_video: 'Fetching video...',
+    fetch_error: 'Failed to fetch video. This may be a network issue or CORS restriction. Try uploading the file directly.',
+    invalid_url: 'Invalid URL.',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} Smart Tools. All rights reserved.`,

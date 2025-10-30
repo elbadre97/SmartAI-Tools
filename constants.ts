@@ -1,4 +1,3 @@
-
 import type { Category, Tool } from './types';
 
 export const CATEGORIES: Category[] = [
@@ -145,11 +144,11 @@ export const TOOLS: Tool[] = [
     id: 'video_text_extractor',
     category: 'productivity',
     title: { ar: 'مستخرج النصوص من الفيديو', en: 'Video Text Extractor' },
-    description: { ar: 'استخرج النص الصوتي من أي ملف فيديو.', en: 'Extract spoken text from any video file.' },
+    description: { ar: 'استخرج النص الصوتي من ملف فيديو أو رابط.', en: 'Extract spoken text from a video file or link.' },
     icon: '🗣️',
-    inputLabel: { ar: 'ارفع ملف الفيديو', en: 'Upload the video file' },
-    placeholder: { ar: '', en: '' },
-    loadingText: { ar: 'جاري استخراج النص...', en: 'Extracting text...' },
+    inputLabel: { ar: 'ارفع ملف فيديو أو الصق رابطًا', en: 'Upload a video file or paste a link' },
+    placeholder: { ar: 'https://example.com/video.mp4', en: 'https://example.com/video.mp4' },
+    loadingText: { ar: 'جاري تحليل الفيديو...', en: 'Analyzing video...' },
     inputType: 'file',
   },
   {

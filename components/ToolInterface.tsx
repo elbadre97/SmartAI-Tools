@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { Tool, Language } from '../types';
 import { generateContent } from '../services/geminiService';
@@ -14,7 +13,7 @@ interface ToolInterfaceProps {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-const fileToBase64 = (file: File): Promise<string> => {
+const mediaFileToBase64 = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -28,6 +27,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const [outputValue, setOutputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingText, setLoadingText] = useState('');
 
   const [isCopied, setIsCopied] = useState(false);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -35,6 +35,10 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   // File handling state
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  
+  // State for video_text_extractor tool
+  const [inputMode, setInputMode] = useState<'upload' | 'url'>('upload');
+  const [urlValue, setUrlValue] = useState('');
 
   const isFileInput = tool.inputType === 'image' || tool.inputType === 'file';
 
@@ -45,9 +49,11 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     setFile(null);
     setFilePreview(null);
     setIsLoading(false);
+    setInputMode('upload');
+    setUrlValue('');
+    setLoadingText('');
   };
 
-  // Reset state when the tool changes
   useEffect(() => {
     resetState();
   }, [tool.id]);
@@ -61,28 +67,56 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
         }
         setError(null);
         setFile(selectedFile);
+        
+        const previewUrl = URL.createObjectURL(selectedFile);
         if (selectedFile.type.startsWith('image/')) {
-            const previewUrl = URL.createObjectURL(selectedFile);
+            setFilePreview(previewUrl);
+        } else if (selectedFile.type.startsWith('video/')) {
             setFilePreview(previewUrl);
         } else {
-            setFilePreview(null); // No preview for non-image files
+            setFilePreview(null);
         }
     }
   };
 
   const handleGenerate = async () => {
-    if ((isFileInput && !file) || (!isFileInput && !inputValue.trim())) {
+    const isVideoExtractor = tool.id === 'video_text_extractor';
+    if (isVideoExtractor) {
+      if (inputMode === 'upload' && !file) return;
+      if (inputMode === 'url' && !urlValue.trim()) return;
+    } else if ((isFileInput && !file) || (!isFileInput && !inputValue.trim())) {
       return;
     }
     
     setIsLoading(true);
     setError(null);
     setOutputValue('');
+    setLoadingText(tool.loadingText[language]);
     
     try {
       let result;
-      if (isFileInput && file) {
-        const base64Data = await fileToBase64(file);
+      if (isVideoExtractor && inputMode === 'url') {
+          try {
+            setLoadingText(t.fetching_video);
+            const response = await fetch(urlValue);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = await response.blob();
+            
+            if (blob.size > MAX_FILE_SIZE) throw new Error(t.file_too_large);
+            if (!blob.type.startsWith('video/')) throw new Error(t.unsupported_file);
+
+            setFile(new File([blob], "video_from_url", { type: blob.type }));
+            setFilePreview(URL.createObjectURL(blob));
+
+            setLoadingText(tool.loadingText[language]);
+            const base64Data = await mediaFileToBase64(blob);
+            result = await generateContent(tool.id, { data: base64Data, mimeType: blob.type }, language);
+          } catch (fetchError) {
+             console.error("Fetch error:", fetchError);
+             throw new Error(t.fetch_error);
+          }
+      } else if (isFileInput && file) {
+        const base64Data = await mediaFileToBase64(file);
         result = await generateContent(tool.id, { data: base64Data, mimeType: file.type }, language);
       } else {
         result = await generateContent(tool.id, inputValue, language);
@@ -93,13 +127,18 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
       setError(errorMessage);
     } finally {
       setIsLoading(false);
+      setLoadingText('');
     }
   };
 
   const handlePaste = async () => {
     try {
         const text = await navigator.clipboard.readText();
-        setInputValue(text);
+        if (tool.id === 'video_text_extractor' && inputMode === 'url') {
+            setUrlValue(text);
+        } else {
+            setInputValue(text);
+        }
     } catch (err) {
         console.error('Failed to read clipboard contents: ', err);
     }
@@ -117,6 +156,56 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   };
 
   const isOutputImage = (tool.id === 'image' || tool.id === 'image_bg_remover') && outputValue.startsWith('data:image');
+  const isVideoExtractor = tool.id === 'video_text_extractor';
+
+  const renderFileInput = () => (
+    <div className="relative border-2 border-dashed border-white/30 rounded-xl p-6 text-center h-full flex flex-col justify-center items-center">
+       <input
+           type="file"
+           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+           onChange={handleFileChange}
+           accept={tool.id === 'video_text_extractor' ? 'video/*' : 'image/*'}
+       />
+       {!file && <UploadIcon />}
+       <p className="mt-2 text-sm text-white/80">{t.upload_file}</p>
+       <p className="text-xs text-white/60">{t.or_drop_file}</p>
+       
+       {filePreview && file?.type.startsWith('image/') && (
+           <div className="mt-4">
+               <p className="font-semibold text-sm mb-2">{t.image_preview}</p>
+               <img src={filePreview} alt="Preview" className="max-h-24 rounded-lg" />
+           </div>
+       )}
+        {filePreview && file?.type.startsWith('video/') && (
+           <div className="mt-4">
+               <p className="font-semibold text-sm mb-2">{t.video_preview}</p>
+               <video src={filePreview} controls className="max-h-28 rounded-lg" />
+           </div>
+       )}
+        {file && !filePreview && (
+           <div className="mt-4 text-sm">
+               <p className="font-semibold mb-2">{t.file_preview}</p>
+               <p>{file.name} ({(file.size / 1024).toFixed(2)} KB)</p>
+           </div>
+       )}
+   </div>
+  );
+  
+  const renderUrlInput = () => (
+    <div className="relative h-full">
+        <textarea
+            value={urlValue}
+            onChange={(e) => setUrlValue(e.target.value)}
+            placeholder={tool.placeholder[language]}
+            className="w-full h-full bg-white/10 dark:bg-gray-900/20 rounded-xl p-4 focus:ring-2 focus:ring-purple-400 focus:outline-none resize-none transition-colors"
+            rows={10}
+        />
+        <div className="absolute top-2 ltr:right-2 rtl:left-2 flex gap-1">
+            <button onClick={handlePaste} title={t.paste_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white"><PasteIcon /></button>
+            <button onClick={() => setUrlValue('')} title={t.clear_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white"><ClearIcon /></button>
+        </div>
+    </div>
+  );
 
   return (
     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up">
@@ -137,30 +226,18 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
         {/* Input Column */}
         <div className="flex flex-col gap-4">
           <label className="font-semibold">{tool.inputLabel[language]}</label>
-          {isFileInput ? (
-             <div className="relative border-2 border-dashed border-white/30 rounded-xl p-6 text-center h-full flex flex-col justify-center items-center">
-                <input
-                    type="file"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={handleFileChange}
-                    accept={tool.id === 'video_text_extractor' ? 'video/*' : 'image/*'}
-                />
-                {!file && <UploadIcon />}
-                <p className="mt-2 text-sm text-white/80">{t.upload_file}</p>
-                <p className="text-xs text-white/60">{t.or_drop_file}</p>
-                {filePreview && (
-                    <div className="mt-4">
-                        <p className="font-semibold text-sm mb-2">{t.image_preview}</p>
-                        <img src={filePreview} alt="Preview" className="max-h-24 rounded-lg" />
-                    </div>
-                )}
-                 {file && !filePreview && (
-                    <div className="mt-4 text-sm">
-                        <p className="font-semibold mb-2">{t.file_preview}</p>
-                        <p>{file.name} ({(file.size / 1024).toFixed(2)} KB)</p>
-                    </div>
-                )}
+          
+          {isVideoExtractor && (
+            <div className="flex items-center bg-white/10 p-1 rounded-full">
+                <button onClick={() => setInputMode('upload')} className={`w-1/2 py-2 rounded-full text-sm font-semibold transition-colors ${inputMode === 'upload' ? 'bg-white text-indigo-600' : 'text-white/80'}`}>{t.upload_tab}</button>
+                <button onClick={() => setInputMode('url')} className={`w-1/2 py-2 rounded-full text-sm font-semibold transition-colors ${inputMode === 'url' ? 'bg-white text-indigo-600' : 'text-white/80'}`}>{t.url_tab}</button>
             </div>
+          )}
+
+          {isVideoExtractor ? (
+            inputMode === 'upload' ? renderFileInput() : renderUrlInput()
+          ) : isFileInput ? (
+            renderFileInput()
           ) : (
             <div className="relative">
                 <textarea
@@ -176,12 +253,13 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 </div>
             </div>
           )}
+
           <button
             onClick={handleGenerate}
-            disabled={isLoading || (!isFileInput && !inputValue.trim()) || (isFileInput && !file)}
+            disabled={isLoading || (isVideoExtractor ? (inputMode === 'upload' ? !file : !urlValue.trim()) : (isFileInput ? !file : !inputValue.trim()))}
             className="bg-indigo-500 hover:bg-indigo-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? <Spinner /> : <span>{isLoading ? tool.loadingText[language] : t.generate_button}</span>}
+            {isLoading ? <Spinner /> : <span>{isVideoExtractor ? t.extract_text_button : t.generate_button}</span>}
           </button>
            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         </div>
@@ -207,7 +285,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
              {isLoading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <Spinner />
-                <p className="mt-2 text-sm opacity-80">{tool.loadingText[language]}</p>
+                <p className="mt-2 text-sm opacity-80">{loadingText || tool.loadingText[language]}</p>
               </div>
             )}
             {!isLoading && !outputValue && (
