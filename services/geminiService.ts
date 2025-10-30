@@ -39,6 +39,7 @@ const prompts: Record<Language, Partial<Record<ToolType, (input: string) => stri
     long_video_script: (input: string) => `اكتب سكريبت احترافي ومفصل لفيديو طويل على يوتيوب حول الموضوع التالي. يجب أن يتضمن السكريبت مقدمة جذابة، محتوى مقسم إلى فقرات، وخاتمة قوية. الموضوع: "${input}"`,
     short_video_script: (input: string) => `اكتب سكريبت جذاب ومختصر لفيديو قصير (مثل تيك توك أو ريلز) حول الفكرة التالية. يجب أن يكون سريع الإيقاع ومناسب للمشاهدة على الهاتف. الفكرة: "${input}"`,
     image_prompt_extractor: (input: string) => `صف هذه الصورة بالتفصيل. يجب أن يكون الوصف دقيقًا وغنيًا بالكلمات المفتاحية بحيث يمكن استخدامه كـ "برومبت" (أمر) لإنشاء صورة مشابهة لها بواسطة مولد صور آخر يعمل بالذكاء الاصطناعي.`,
+    video_text_extractor: (input: string) => `استخرج النص الكامل المنطوق في هذا الفيديو. قم بتوفير النص فقط بدون أي تعليقات إضافية.`,
   },
   en: {
     text: (input: string) => `Generate a creative and detailed text in English based on the following idea: "${input}"`,
@@ -49,6 +50,7 @@ const prompts: Record<Language, Partial<Record<ToolType, (input: string) => stri
     long_video_script: (input: string) => `Write a professional and detailed script for a long-form YouTube video about the following topic. The script should include an engaging intro, content divided into sections, and a strong conclusion. Topic: "${input}"`,
     short_video_script: (input: string) => `Write a catchy and concise script for a short video (like TikTok or Reels) about the following idea. It should be fast-paced and suitable for mobile viewing. Idea: "${input}"`,
     image_prompt_extractor: (input: string) => `Describe this image in detail. The description should be precise and rich with keywords, suitable for use as a 'prompt' to generate a similar image with another AI image generator.`,
+    video_text_extractor: (input: string) => `Extract the full spoken text from this video. Provide only the transcription without any additional commentary.`,
   }
 };
 
@@ -130,6 +132,22 @@ export const generateContent = async (toolType: ToolType, input: string | { data
         const response = await aiInstance.models.generateContent({
             model: 'gemini-2.5-pro',
             contents: { parts: [imagePart, textPart] },
+        });
+        return response.text;
+    } else if (toolType === 'video_text_extractor') {
+        if (typeof input !== 'object' || !input.data || !input.mimeType) {
+            throw new Error('Invalid input for video text extractor.');
+        }
+        const videoPart = {
+            inlineData: {
+                data: input.data,
+                mimeType: input.mimeType,
+            },
+        };
+        const textPart = { text: getPromptForTool(toolType, '', lang) };
+        const response = await aiInstance.models.generateContent({
+            model: 'gemini-2.5-pro',
+            contents: { parts: [videoPart, textPart] },
         });
         return response.text;
     } else {

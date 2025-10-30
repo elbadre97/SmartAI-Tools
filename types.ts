@@ -18,6 +18,7 @@ export type ToolType =
   | 'video_downloader'
   | 'file_converter'
   | 'file_compressor'
+  | 'video_text_extractor'
   | 'code';
 
 export type InputType = 'text' | 'image' | 'file';
