@@ -1,12 +1,22 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import type { ToolType, Language } from '../types';
 
-const API_KEY = process.env.API_KEY;
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
+// Lazily initialize the GoogleGenAI instance to avoid crashing on startup
+let ai: GoogleGenAI | null = null;
+
+const getAiInstance = (lang: Language): GoogleGenAI | null => {
+    if (ai) {
+        return ai;
+    }
+    const API_KEY = process.env.API_KEY;
+    if (!API_KEY) {
+        // The error will be handled in the generateContent function
+        return null;
+    }
+    ai = new GoogleGenAI({ apiKey: API_KEY });
+    return ai;
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 const prompts: Record<Language, Partial<Record<ToolType, (input: string) => string>>> = {
   ar: {
@@ -35,11 +45,19 @@ const getPromptForTool = (toolType: ToolType, input: string, lang: Language): st
 };
 
 export const generateContent = async (toolType: ToolType, input: string | { data: string; mimeType: string }, lang: Language): Promise<string> => {
+  const aiInstance = getAiInstance(lang);
+  if (!aiInstance) {
+      // Return a user-friendly error instead of crashing the app
+      return lang === 'ar'
+        ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
+        : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
+  }
+
   try {
     if (toolType === 'image') {
        // Imagen performs better with English prompts.
       const imagePrompt = `A vivid, high-quality image of: ${input}`;
-      const response = await ai.models.generateImages({
+      const response = await aiInstance.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt: imagePrompt,
         config: {
@@ -68,7 +86,7 @@ export const generateContent = async (toolType: ToolType, input: string | { data
         const textPart = {
             text: 'Remove the background from this image. The output should be a PNG with a transparent background.',
         };
-        const response = await ai.models.generateContent({
+        const response = await aiInstance.models.generateContent({
             model: 'gemini-2.5-flash-image',
             contents: { parts: [imagePart, textPart] },
             config: {
@@ -87,7 +105,7 @@ export const generateContent = async (toolType: ToolType, input: string | { data
 
     } else {
       const prompt = getPromptForTool(toolType, input as string, lang);
-      const response = await ai.models.generateContent({
+      const response = await aiInstance.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
