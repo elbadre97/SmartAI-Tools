@@ -11,6 +11,7 @@ interface HeaderProps {
   onLogin: () => void;
   onLogout: () => void;
   authInitialized: boolean;
+  isAuthEnabled: boolean;
   t: Record<string, string>;
 }
 
@@ -18,7 +19,7 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
   <span className="text-xl">{theme === 'light' ? '🌙' : '☀️'}</span>
 );
 
-export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, t }) => {
+export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, isAuthEnabled, t }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -80,7 +81,9 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
                 ) : (
                   <button
                     onClick={onLogin}
-                    className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
+                    disabled={!isAuthEnabled}
+                    className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!isAuthEnabled ? t.auth_disabled_tooltip : ''}
                   >
                     {t.login}
                   </button>

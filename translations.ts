@@ -20,6 +20,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_modal_subtitle: "اختر طريقة تسجيل الدخول للمتابعة.",
     login_with_google: "تسجيل الدخول باستخدام جوجل",
     login_error: "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    auth_disabled_tooltip: "خدمة تسجيل الدخول غير مهيأة حالياً.",
+    auth_not_configured: "خدمة المصادقة غير مهيأة. يرجى الاتصال بمسؤول الموقع.",
     
     // Tool Interface
     close: "إغلاق",
@@ -91,6 +93,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_modal_subtitle: "Choose a login method to continue.",
     login_with_google: "Sign in with Google",
     login_error: "An error occurred during sign-in. Please try again.",
+    auth_disabled_tooltip: "Login service is not configured.",
+    auth_not_configured: "Authentication service is not configured. Please contact the site administrator.",
     
     // Tool Interface
     close: "Close",

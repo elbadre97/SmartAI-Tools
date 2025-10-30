@@ -21,6 +21,9 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
 
+  // Determine if authentication is configured and enabled
+  const isAuthEnabled = !!auth;
+
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -37,25 +40,32 @@ export default function App() {
   }, [language]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        const appUser: User = {
-          name: {
-            ar: firebaseUser.displayName || 'مستخدم',
-            en: firebaseUser.displayName || 'User',
-          },
-          email: firebaseUser.email || '',
-          photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
-        };
-        setUser(appUser);
-      } else {
-        setUser(null);
-      }
-      setAuthInitialized(true);
-    });
+    // Only set up the auth state listener if Firebase Auth was initialized successfully
+    if (isAuthEnabled) {
+      const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+        if (firebaseUser) {
+          const appUser: User = {
+            name: {
+              ar: firebaseUser.displayName || 'مستخدم',
+              en: firebaseUser.displayName || 'User',
+            },
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
+          };
+          setUser(appUser);
+        } else {
+          setUser(null);
+        }
+        setAuthInitialized(true);
+      });
 
-    return () => unsubscribe();
-  }, []);
+      return () => unsubscribe();
+    } else {
+      // If auth is not enabled, mark it as initialized and proceed without a user
+      setAuthInitialized(true);
+      setUser(null);
+    }
+  }, [isAuthEnabled]);
 
   const toggleLanguage = () => {
     setLanguage(prev => (prev === 'ar' ? 'en' : 'ar'));
@@ -76,10 +86,16 @@ export default function App() {
   };
   
   const handleLogin = () => {
-    setIsLoginModalOpen(true);
+    if (isAuthEnabled) {
+      setIsLoginModalOpen(true);
+    } else {
+      alert(language === 'ar' ? 'خدمة تسجيل الدخول غير مفعلة حالياً.' : 'Login service is not configured.');
+    }
   };
 
   const handleLogout = async () => {
+    // Only attempt to sign out if auth is enabled
+    if (!isAuthEnabled) return;
     try {
       await signOut(auth);
     } catch (error) {
@@ -102,6 +118,7 @@ export default function App() {
         onLogin={handleLogin}
         onLogout={handleLogout}
         authInitialized={authInitialized}
+        isAuthEnabled={isAuthEnabled}
         t={t}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">

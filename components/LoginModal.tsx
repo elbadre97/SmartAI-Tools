@@ -30,6 +30,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t, language }) 
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
+    // Guard against missing auth configuration
+    if (!auth || !googleProvider) {
+      setError(t.auth_not_configured);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
