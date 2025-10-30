@@ -19,6 +19,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_modal_title: "تسجيل الدخول",
     login_modal_subtitle: "اختر طريقة تسجيل الدخول للمتابعة.",
     login_with_google: "تسجيل الدخول باستخدام جوجل",
+    login_choose_account: "اختر حسابًا",
+    login_use_another_account: "استخدام حساب آخر",
     login_modal_disclaimer: "ملاحظة: هذه عملية تسجيل دخول تجريبية. لن يتم الوصول إلى حسابك الحقيقي.",
     
     // Tool Interface
@@ -90,6 +92,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_modal_title: "Login",
     login_modal_subtitle: "Choose a login method to continue.",
     login_with_google: "Sign in with Google",
+    login_choose_account: "Choose an account",
+    login_use_another_account: "Use another account",
     login_modal_disclaimer: "Note: This is a simulated login for demo purposes. Your real account will not be accessed.",
     
     // Tool Interface

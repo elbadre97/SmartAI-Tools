@@ -55,12 +55,8 @@ export default function App() {
     setIsLoginModalOpen(true);
   };
 
-  const handlePerformLogin = () => {
-    // In a real app, this would involve an auth provider like Firebase or Auth0
-    setUser({
-      name: { ar: 'علي أحمد', en: 'Ali Ahmed' },
-      photoURL: `https://avatar.iran.liara.run/public/boy?username=ali`
-    });
+  const handlePerformLogin = (selectedUser: User) => {
+    setUser(selectedUser);
     setIsLoginModalOpen(false);
   };
 
@@ -116,6 +112,7 @@ export default function App() {
           onClose={() => setIsLoginModalOpen(false)}
           onLogin={handlePerformLogin}
           t={t}
+          language={language}
         />
       )}
     </div>
