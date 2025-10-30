@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, AuthError } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { CloseIcon } from './icons/ActionIcons';
 import type { Language } from '../types';
 import { Spinner } from './icons/Spinner';
-import { auth } from "../services/firebase";
-
 
 interface LoginModalProps {
   onClose: () => void;
@@ -27,13 +25,15 @@ const GoogleIcon = () => (
     </svg>
 );
 
+const googleProvider = new GoogleAuthProvider();
+
 export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t, language }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     // Guard against missing auth configuration
-    if (!auth || !googleProvider) {
+    if (!auth) {
       setError(t.auth_not_configured);
       return;
     }

@@ -86,10 +86,10 @@ export default function App() {
   };
   
   const handleLogin = () => {
+    // The button that calls this is disabled when auth is not enabled,
+    // so the 'else' block with the alert was unreachable.
     if (isAuthEnabled) {
       setIsLoginModalOpen(true);
-    } else {
-      alert(language === 'ar' ? 'خدمة تسجيل الدخول غير مفعلة حالياً.' : 'Login service is not configured.');
     }
   };
 

@@ -1,10 +1,11 @@
 // services/firebase.ts
 
-// ✅ استيراد الوظائف التي نحتاجها
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported } from "firebase/analytics";
+// FIX: Changed to namespace imports to avoid potential module resolution issues.
+// This preserves the v9+ modular API while being more robust with some build tools.
+import * as firebaseApp from "firebase/app";
+import * as firebaseAuth from "firebase/auth";
+import * as firebaseFirestore from "firebase/firestore";
+import * as firebaseAnalytics from "firebase/analytics";
 
 // ✅ إعدادات تطبيقك من Firebase Console
 const firebaseConfig = {
@@ -18,17 +19,17 @@ const firebaseConfig = {
 };
 
 // ✅ تهيئة التطبيق
-const app = initializeApp(firebaseConfig);
+const app = firebaseApp.initializeApp(firebaseConfig);
 
 // ✅ تفعيل خدمات Firebase
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = firebaseAuth.getAuth(app);
+export const db = firebaseFirestore.getFirestore(app);
 
 // ✅ تفعيل التحليلات (analytics) فقط إذا كانت مدعومة
 let analytics: any = null;
 if (typeof window !== "undefined") {
-  isSupported().then((supported) => {
-    if (supported) analytics = getAnalytics(app);
+  firebaseAnalytics.isSupported().then((supported) => {
+    if (supported) analytics = firebaseAnalytics.getAnalytics(app);
   });
 }
 
