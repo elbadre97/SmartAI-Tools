@@ -5,6 +5,7 @@ import { ToolInterface } from './components/ToolInterface';
 import { Footer } from './components/Footer';
 import { Stats } from './components/Stats';
 import { CategoryTabs } from './components/CategoryTabs';
+import { LoginModal } from './components/LoginModal';
 import { TOOLS, CATEGORIES } from './constants';
 import type { Tool, Language, CategoryType, User } from './types';
 import { translations } from './translations';
@@ -15,6 +16,7 @@ export default function App() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>(CATEGORIES[0].id);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -50,11 +52,16 @@ export default function App() {
   };
   
   const handleLogin = () => {
+    setIsLoginModalOpen(true);
+  };
+
+  const handlePerformLogin = () => {
     // In a real app, this would involve an auth provider like Firebase or Auth0
     setUser({
       name: { ar: 'علي أحمد', en: 'Ali Ahmed' },
       photoURL: `https://avatar.iran.liara.run/public/boy?username=ali`
     });
+    setIsLoginModalOpen(false);
   };
 
   const handleLogout = () => {
@@ -104,6 +111,13 @@ export default function App() {
         </div>
       </main>
       <Footer t={t} />
+      {isLoginModalOpen && (
+        <LoginModal 
+          onClose={() => setIsLoginModalOpen(false)}
+          onLogin={handlePerformLogin}
+          t={t}
+        />
+      )}
     </div>
   );
 }

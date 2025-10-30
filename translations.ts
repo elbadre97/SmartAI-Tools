@@ -15,6 +15,12 @@ export const translations: Record<Language, Record<string, string>> = {
     main_title: "🚀 منصة الذكاء الاصطناعي المتكاملة",
     main_subtitle: "اختر الأداة المناسبة وابدأ في إنشاء محتوى مذهل",
     
+    // Login Modal
+    login_modal_title: "تسجيل الدخول",
+    login_modal_subtitle: "اختر طريقة تسجيل الدخول للمتابعة.",
+    login_with_google: "تسجيل الدخول باستخدام جوجل",
+    login_modal_disclaimer: "ملاحظة: هذه عملية تسجيل دخول تجريبية. لن يتم الوصول إلى حسابك الحقيقي.",
+    
     // Tool Interface
     close: "إغلاق",
     char_count: "حرف",
@@ -79,6 +85,12 @@ export const translations: Record<Language, Record<string, string>> = {
     // Main Title
     main_title: "🚀 The All-in-One AI Platform",
     main_subtitle: "Choose the right tool and start creating amazing content",
+
+    // Login Modal
+    login_modal_title: "Login",
+    login_modal_subtitle: "Choose a login method to continue.",
+    login_with_google: "Sign in with Google",
+    login_modal_disclaimer: "Note: This is a simulated login for demo purposes. Your real account will not be accessed.",
     
     // Tool Interface
     close: "Close",
