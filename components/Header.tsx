@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme, language, to
             <div className="w-px h-6 bg-white/20 mx-2"></div>
 
             {user ? (
-              <UserMenu user={user} onLogout={onLogout} t={t} />
+              <UserMenu user={user} onLogout={onLogout} t={t} language={language} />
             ) : (
               <button
                 onClick={onLogin}

@@ -6,7 +6,7 @@ export type InputType = 'text' | 'image' | 'file';
 export type LocalizedString = Record<Language, string>;
 
 export interface User {
-  name: string;
+  name: LocalizedString;
   photoURL: string;
 }
 

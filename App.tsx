@@ -52,7 +52,7 @@ export default function App() {
   const handleLogin = () => {
     // In a real app, this would involve an auth provider like Firebase or Auth0
     setUser({
-      name: language === 'ar' ? 'علي أحمد' : 'Ali Ahmed',
+      name: { ar: 'علي أحمد', en: 'Ali Ahmed' },
       photoURL: `https://avatar.iran.liara.run/public/boy?username=ali`
     });
   };
