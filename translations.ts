@@ -50,6 +50,7 @@ export const translations: Record<Language, Record<string, string>> = {
     login_with_google: 'تسجيل الدخول باستخدام جوجل',
     login_error: 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.',
     auth_not_configured: 'خدمة المصادقة غير مهيأة حاليًا.',
+    auth_api_not_enabled_error: 'خطأ في الإعداد: خدمة المصادقة (Identity Toolkit API) غير مفعلة لهذا المشروع. يرجى تفعيلها من Google Cloud Console.',
 
   },
   en: {
@@ -101,5 +102,6 @@ export const translations: Record<Language, Record<string, string>> = {
     login_with_google: 'Sign in with Google',
     login_error: 'An error occurred during sign-in. Please try again.',
     auth_not_configured: 'Authentication service is not configured.',
+    auth_api_not_enabled_error: 'Configuration Error: The Identity Toolkit API is not enabled for this project. Please enable it in the Google Cloud Console.',
   },
 };

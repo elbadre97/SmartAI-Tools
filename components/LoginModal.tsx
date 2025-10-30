@@ -46,7 +46,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t, language }) 
     } catch (err) {
       const authError = err as AuthError;
       console.error("Firebase Auth Error:", authError);
-      setError(t.login_error);
+      // Provide a specific error message for the common API-not-enabled issue.
+      // The error code can contain the project ID, making it brittle. A substring match is more robust.
+      if (authError.code.includes('auth/identity-toolkit-api-has-not-been-used')) {
+          setError(t.auth_api_not_enabled_error);
+      } else {
+          setError(t.login_error);
+      }
     } finally {
       setIsLoading(false);
     }
