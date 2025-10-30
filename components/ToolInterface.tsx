@@ -106,51 +106,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
 
     try {
         let result: string;
-        if (tool.id === 'video_downloader') {
-            if (!inputText.trim() || !inputText.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
-                setError(language === 'ar' ? 'الرجاء إدخال رابط يوتيوب صالح.' : 'Please enter a valid YouTube URL.');
-                setIsLoading(false);
-                return;
-            }
-
-            const response = await fetch('https://co.wuk.sh/api/json', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    url: inputText,
-                    isNoTTWatermark: true,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(language === 'ar' ? 'فشل في جلب بيانات الفيديو.' : 'Failed to fetch video data.');
-            }
-
-            const data = await response.json();
-            
-            if (data.status === 'error') {
-                 throw new Error(data.text || (language === 'ar' ? 'حدث خطأ غير معروف.' : 'An unknown error occurred.'));
-            }
-
-            if (data.status === 'stream') {
-                setDownloadLinks([{ url: data.url, text: language === 'ar' ? 'تحميل الفيديو' : 'Download Video' }]);
-            } else if (data.status === 'picker') {
-                const links = data.picker.map((item: any) => ({
-                    url: item.url,
-                    text: item.type === 'video' 
-                        ? `${item.quality} - ${language === 'ar' ? 'فيديو' : 'Video'}`
-                        : `${item.format} - ${language === 'ar' ? 'صوت فقط' : 'Audio Only'}`
-                }));
-                setDownloadLinks(links);
-            } else {
-                 throw new Error(language === 'ar' ? 'تم استلام استجابة غير متوقعة من الخادم.' : 'Received an unexpected response from the server.');
-            }
-            setOutputText(language === 'ar' ? 'روابط التحميل جاهزة!' : 'Download links are ready!');
-        }
-        else if (tool.id === 'file_compressor') {
+        if (tool.id === 'file_compressor') {
             if (!uploadedFile) {
                 setError(t.file_required_error);
                 setIsLoading(false);
@@ -445,7 +401,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
           className="flex items-center justify-center gap-2 w-full sm:flex-grow bg-gradient-to-r from-[#FF6B6B] to-[#4ECDC4] text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-2xl disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
         >
           {isLoading ? <Spinner /> : '⚡'}
-          <span>{isLoading ? tool.loadingText[language] : (tool.id === 'file_converter' ? t.convert : (tool.id === 'file_compressor' ? t.compress : (tool.id === 'video_downloader' ? (language === 'ar' ? 'تحضير الروابط' : 'Prepare Links') : t.generate)))}</span>
+          <span>{isLoading ? tool.loadingText[language] : (tool.id === 'file_converter' ? t.convert : (tool.id === 'file_compressor' ? t.compress : t.generate))}</span>
         </button>
         {!isFileInputTool && (
             <div className="flex gap-3 justify-center">

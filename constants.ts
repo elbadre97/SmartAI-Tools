@@ -135,17 +135,6 @@ export const TOOLS: Tool[] = [
     loadingText: { ar: 'جاري كتابة الإيميل...', en: 'Writing email...' },
     inputType: 'text',
   },
-  {
-    id: 'video_downloader',
-    category: 'productivity',
-    icon: '📥',
-    title: { ar: 'تحميل الفيديوهات', en: 'Video Downloader' },
-    description: { ar: 'تحميل الفيديوهات من مواقع التواصل الاجتماعي عبر الرابط', en: 'Download videos from social media sites via link' },
-    inputLabel: { ar: 'الصق رابط الفيديو هنا:', en: 'Paste the video link here:' },
-    placeholder: { ar: 'https://...', en: 'https://...' },
-    loadingText: { ar: 'جاري التحضير...', en: 'Preparing...' },
-    inputType: 'text',
-  },
     {
     id: 'file_converter',
     category: 'productivity',
