@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GoogleAuthProvider, signInWithPopup, type AuthError } from "firebase/auth";
+import { GoogleAuthProvider, signInWithRedirect, type AuthError } from "firebase/auth";
 import { auth, signUpWithEmailPassword, signInWithEmailPassword } from "../services/firebase";
 import { CloseIcon } from './icons/ActionIcons';
 import type { Language } from '../types';
@@ -29,6 +29,7 @@ const googleProvider = new GoogleAuthProvider();
 
 const getAuthErrorMessage = (errorCode: string, t: Record<string, string>): string => {
     switch (errorCode) {
+        case 'auth/unauthorized-domain': return t.error_unauthorized_domain;
         case 'auth/email-already-in-use': return t.error_email_in_use;
         case 'auth/weak-password': return t.error_weak_password;
         case 'auth/invalid-email': return t.error_invalid_email;
@@ -56,8 +57,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t }) => {
     setIsLoading(true);
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
-      onClose();
+      // Use redirect flow which is more robust in restricted environments like iframes.
+      await signInWithRedirect(auth, googleProvider);
+      // The page will redirect, so onClose() is not called here.
+      // Auth state is handled by onAuthStateChanged in App.tsx.
     } catch (err) {
       const authError = err as AuthError;
       console.error("Firebase Auth Error:", authError);
@@ -66,8 +69,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, t }) => {
       } else {
           setError(getAuthErrorMessage(authError.code, t));
       }
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Only set loading to false on error.
     }
   };
 

@@ -76,6 +76,7 @@ export const translations: Record<Language, Record<string, string>> = {
     error_wrong_password: 'كلمة مرور غير صحيحة. يرجى المحاولة مرة أخرى.',
     error_generic_signup: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.',
     error_generic_signin: 'حدث خطأ أثناء تسجيل الدخول. يرجى التحقق من بياناتك.',
+    error_unauthorized_domain: 'النطاق الحالي غير مصرح له بتنفيذ عمليات المصادقة. يرجى إضافته إلى إعدادات مشروع Firebase الخاص بك.',
     
     // Modes
     mode: 'وضع التشغيل',
@@ -207,6 +208,7 @@ export const translations: Record<Language, Record<string, string>> = {
     error_wrong_password: 'Incorrect password. Please try again.',
     error_generic_signup: 'An error occurred during sign-up. Please try again.',
     error_generic_signin: 'An error occurred during sign-in. Please check your credentials.',
+    error_unauthorized_domain: 'This website\'s domain is not authorized for authentication. Please add it to the authorized domains list in your Firebase project.',
 
     // Modes
     mode: 'Mode',
