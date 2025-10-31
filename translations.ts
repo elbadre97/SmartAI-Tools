@@ -12,7 +12,7 @@ export const translations: Record<Language, Record<string, string>> = {
     logout: 'خروج',
     auth_disabled_tooltip: 'المصادقة معطلة في هذا الإصدار التجريبي',
     subscribe_button: 'الترقية للاشتراك المميز',
-
+    mode: 'وضع التشغيل',
 
     // Main Content
     main_title: 'منصّتكم المتكاملة لأدوات الذكاء الاصطناعي',
@@ -96,6 +96,40 @@ export const translations: Record<Language, Record<string, string>> = {
     price_per_month: 'شهرياً',
     subscribe_now_button: 'اشترك الآن',
 
+    // Payment Form
+    payment_modal_title: 'إتمام عملية الدفع',
+    choose_payment_method: 'اختر طريقة الدفع',
+    pay_with_card: 'البطاقة',
+    pay_with_paypal: 'PayPal',
+    pay_with_woocommerce: 'WooCommerce',
+    card_number: 'رقم البطاقة',
+    expiry_date: 'تاريخ الانتهاء',
+    mm_yy: 'شهر/سنة',
+    cvc: 'CVC',
+    invalid_card_number: 'رقم البطاقة غير صالح.',
+    invalid_expiry_date: 'تاريخ الانتهاء غير صالح.',
+    invalid_cvc: 'رمز CVC غير صالح.',
+    confirm_payment_button: 'تأكيد الدفع مقابل 10$',
+    proceed_to_paypal: 'المتابعة إلى PayPal',
+    proceed_to_woocommerce: 'المتابعة إلى WooCommerce',
+    payment_redirect_message: 'سيتم توجيهك إلى {service} لإكمال عملية الدفع بأمان.',
+    processing_payment: 'جاري معالجة الدفع...',
+    back_button: 'رجوع',
+
+    // Mode Selector
+    mode_trial: 'الوضع التجريبي',
+    mode_trial_desc: 'استخدم النقاط المجانية لتجربة الأدوات.',
+    mode_user_api: 'مفتاح API الخاص',
+    mode_user_api_desc: 'استخدم مفتاح Gemini API الخاص بك للاستخدام غير المحدود.',
+
+    // API Key Modal
+    api_key_modal_title: 'إدارة مفتاح API',
+    api_key_modal_subtitle: 'أدخل مفتاح Google Gemini API الخاص بك للاستفادة من وضع الاستخدام غير المحدود. يتم حفظ مفتاحك محليًا في متصفحك فقط.',
+    api_key_placeholder: 'أدخل مفتاح Gemini API هنا...',
+    api_key_get_yours: 'احصل على مفتاحك من Google AI Studio.',
+    save_api_key: 'حفظ المفتاح',
+    api_key_saved: 'تم الحفظ!',
+    clear_api_key: 'إزالة المفتاح الحالي',
 
   },
   en: {
@@ -109,6 +143,7 @@ export const translations: Record<Language, Record<string, string>> = {
     logout: 'Logout',
     auth_disabled_tooltip: 'Authentication is disabled in this demo build',
     subscribe_button: 'Go Premium',
+    mode: 'Mode',
 
     // Main Content
     main_title: 'Your All-in-One AI Toolkit',
@@ -192,5 +227,39 @@ export const translations: Record<Language, Record<string, string>> = {
     price_per_month: 'per month',
     subscribe_now_button: 'Subscribe Now',
 
+    // Payment Form
+    payment_modal_title: 'Complete Payment',
+    choose_payment_method: 'Choose payment method',
+    pay_with_card: 'Card',
+    pay_with_paypal: 'PayPal',
+    pay_with_woocommerce: 'WooCommerce',
+    card_number: 'Card Number',
+    expiry_date: 'Expiry Date',
+    mm_yy: 'MM/YY',
+    cvc: 'CVC',
+    invalid_card_number: 'Invalid card number.',
+    invalid_expiry_date: 'Invalid expiry date.',
+    invalid_cvc: 'Invalid CVC.',
+    confirm_payment_button: 'Confirm Payment of $10',
+    proceed_to_paypal: 'Proceed to PayPal',
+    proceed_to_woocommerce: 'Proceed to WooCommerce',
+    payment_redirect_message: 'You will be redirected to {service} to complete your purchase securely.',
+    processing_payment: 'Processing Payment...',
+    back_button: 'Back',
+    
+    // Mode Selector
+    mode_trial: 'Trial Mode',
+    mode_trial_desc: 'Use free points to try out the tools.',
+    mode_user_api: 'Own API Key',
+    mode_user_api_desc: 'Use your own Gemini API key for unlimited usage.',
+
+    // API Key Modal
+    api_key_modal_title: 'API Key Management',
+    api_key_modal_subtitle: 'Enter your Google Gemini API key to use the unlimited mode. Your key is stored locally in your browser and never sent to our servers.',
+    api_key_placeholder: 'Enter your Gemini API key here...',
+    api_key_get_yours: 'Get your key from Google AI Studio.',
+    save_api_key: 'Save Key',
+    api_key_saved: 'Saved!',
+    clear_api_key: 'Clear Current Key',
   },
 };

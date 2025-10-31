@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Language, User, AppMode } from '../types';
 import { UserMenu } from './UserMenu';
+import { ModeSelector } from './ModeSelector';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -14,6 +15,9 @@ interface HeaderProps {
   authInitialized: boolean;
   isAuthEnabled: boolean;
   mode: AppMode;
+  onModeChange: (mode: AppMode) => void;
+  onApiKeySettings: () => void;
+  userApiKey: string | null;
   t: Record<string, string>;
 }
 
@@ -22,7 +26,7 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
 );
 
 export const Header: React.FC<HeaderProps> = ({ 
-    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, onSubscribe, authInitialized, isAuthEnabled, mode, t
+    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, onSubscribe, authInitialized, isAuthEnabled, mode, onModeChange, onApiKeySettings, userApiKey, t
 }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -67,6 +71,14 @@ export const Header: React.FC<HeaderProps> = ({
                   <span>{user.points}</span>
               </div>
             )}
+             <ModeSelector 
+                mode={mode}
+                onModeChange={onModeChange}
+                language={language}
+                t={t}
+                userApiKey={userApiKey}
+                onApiKeySettings={onApiKeySettings}
+             />
 
             <button
               onClick={toggleLanguage}
@@ -106,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={onLogin}
                     disabled={!isAuthEnabled}
-                    className="bg-indigo-500 hover:bg-indigo-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     title={!isAuthEnabled ? t.auth_disabled_tooltip : ''}
                   >
                     {t.login}

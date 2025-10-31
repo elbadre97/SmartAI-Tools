@@ -7,6 +7,7 @@ import { Stats } from './components/Stats';
 import { CategoryTabs } from './components/CategoryTabs';
 import { LoginModal } from './components/LoginModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
+import { ApiKeyModal } from './components/ApiKeyModal';
 import { TOOLS, CATEGORIES } from './constants';
 import type { Tool, Language, CategoryType, User, AppMode } from './types';
 import { translations } from './translations';
@@ -21,10 +22,21 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
+  
   const [mode, setMode] = useState<AppMode>('trial');
+  const [userApiKey, setUserApiKey] = useState<string | null>(null);
   
   const isAuthEnabled = !!auth;
+
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('userGeminiApiKey');
+    if (storedApiKey) {
+      setUserApiKey(storedApiKey);
+      setMode('user_api');
+    }
+  }, []);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -78,6 +90,29 @@ export default function App() {
     
     return () => unsubscribe();
   }, [isAuthEnabled]);
+  
+  const handleModeChange = (newMode: AppMode) => {
+    if (newMode === 'user_api' && !userApiKey) {
+      setIsApiKeyModalOpen(true);
+    } else {
+      setMode(newMode);
+    }
+  };
+
+  const handleSaveApiKey = (key: string) => {
+    const newKey = key.trim();
+    if (newKey) {
+        setUserApiKey(newKey);
+        localStorage.setItem('userGeminiApiKey', newKey);
+        setMode('user_api');
+    } else {
+        setUserApiKey(null);
+        localStorage.removeItem('userGeminiApiKey');
+        setMode('trial');
+    }
+    setIsApiKeyModalOpen(false);
+  };
+
 
   const handleDeductPoint = async (amount: number) => {
     if (user && user.points > 0) {
@@ -115,8 +150,10 @@ export default function App() {
     if (!isAuthEnabled || !auth) return;
     try {
       await signOut(auth);
-      setMode('trial');
-      // onAuthStateChanged will handle setting user to null
+      // Reset to trial unless user has their own API key set
+      if (!userApiKey) {
+        setMode('trial');
+      }
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -139,11 +176,14 @@ export default function App() {
         authInitialized={authInitialized}
         isAuthEnabled={isAuthEnabled}
         mode={mode}
+        onModeChange={handleModeChange}
+        onApiKeySettings={() => setIsApiKeyModalOpen(true)}
+        userApiKey={userApiKey}
         t={t}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="text-center mb-10 md:mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4 animate-fade-in-down">{t.main_title}</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 animate-fade-in-down bg-gradient-to-r from-purple-300 to-indigo-300 bg-clip-text text-transparent">{t.main_title}</h2>
           <p className="text-lg sm:text-xl opacity-90 animate-fade-in-up">{t.main_subtitle}</p>
         </div>
 
@@ -165,7 +205,7 @@ export default function App() {
                 language={language} 
                 t={t}
                 mode={mode}
-                userApiKey={null}
+                userApiKey={userApiKey}
                 user={user}
                 onDeductPoint={handleDeductPoint}
                 onLogin={handleLogin}
@@ -196,6 +236,14 @@ export default function App() {
           language={language}
         />
       )}
+       <ApiKeyModal
+          isOpen={isApiKeyModalOpen}
+          onClose={() => setIsApiKeyModalOpen(false)}
+          onSave={handleSaveApiKey}
+          currentKey={userApiKey}
+          t={t}
+          language={language}
+        />
     </div>
   );
 }

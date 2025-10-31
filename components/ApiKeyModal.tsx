@@ -19,25 +19,26 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
 
   useEffect(() => {
     setApiKey(currentKey || '');
+  }, [isOpen, currentKey]);
+  
+  useEffect(() => {
     setSaveButtonText(t.save_api_key);
-  }, [isOpen, currentKey, t.save_api_key]);
+  }, [isOpen, t.save_api_key]);
   
   if (!isOpen) return null;
 
   const handleSave = () => {
     setIsSaving(true);
-    onSave(apiKey);
     setSaveButtonText(t.api_key_saved);
     setTimeout(() => {
         setIsSaving(false);
-        onClose();
-    }, 1500);
+        onSave(apiKey); // Call onSave after visual feedback
+    }, 1000);
   };
 
   const handleClear = () => {
     setApiKey('');
-    onSave('');
-    onClose();
+    onSave(''); // This will also trigger close via parent logic
   };
 
 
@@ -60,7 +61,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
         </div>
 
         <div className="animate-fade-in">
-            <p className="text-gray-600 dark:text-gray-300 mb-4">{t.api_key_modal_subtitle}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed">{t.api_key_modal_subtitle}</p>
             
             <input 
                 type="password"
@@ -82,12 +83,12 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSav
                     className="w-full flex items-center justify-center gap-3 bg-indigo-500 hover:bg-indigo-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
                 >
                     {isSaving ? <Spinner /> : null}
-                    <span>{saveButtonText}</span>
+                    <span>{isSaving ? t.api_key_saved : t.save_api_key}</span>
                 </button>
                  {currentKey && (
                     <button
                         onClick={handleClear}
-                        className="w-full sm:w-auto bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
+                        className="w-full sm:w-auto bg-red-500/80 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm"
                     >
                        {t.clear_api_key}
                     </button>

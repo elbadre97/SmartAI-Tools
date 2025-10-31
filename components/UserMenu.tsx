@@ -66,7 +66,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout, t, language,
               onLogout();
               setIsOpen(false);
             }}
-            className="w-full text-left rtl:text-right px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors font-semibold"
+            className="w-full text-center px-3 py-2 rounded-lg bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white transition-colors font-semibold"
           >
             {t.logout}
           </button>

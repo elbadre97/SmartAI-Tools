@@ -7,17 +7,19 @@ interface ModeSelectorProps {
   language: Language;
   t: Record<string, string>;
   userApiKey: string | null;
+  onApiKeySettings: () => void;
 }
 
 const ModeIcon = ({ mode }: { mode: AppMode }) => {
     switch (mode) {
         case 'trial': return <span className="text-xl">💎</span>;
         case 'user_api': return <span className="text-xl">🔑</span>;
+        case 'premium': return <span className="text-xl">⭐</span>;
         default: return null;
     }
 }
 
-export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange, t, userApiKey }) => {
+export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange, t, userApiKey, onApiKeySettings }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +41,11 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange, 
   }, []);
 
   const handleSelect = (selectedMode: AppMode) => {
-    onModeChange(selectedMode);
+    if (selectedMode === 'user_api') {
+      onApiKeySettings();
+    } else {
+      onModeChange(selectedMode);
+    }
     setIsOpen(false);
   };
 
@@ -47,13 +53,11 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange, 
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-white/20 transition-colors w-full h-10 flex items-center justify-center gap-2"
+        className="p-2 rounded-full hover:bg-white/20 transition-colors h-10 flex items-center justify-center gap-2"
         aria-label="Toggle Mode"
         title={t.mode}
       >
         <ModeIcon mode={mode} />
-        <span className="font-semibold hidden md:inline">{currentModeDetails.title}</span>
-        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
       </button>
 
       {isOpen && (
