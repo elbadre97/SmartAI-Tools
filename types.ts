@@ -37,7 +37,7 @@ export interface User {
 
 export interface UserProfileData {
     points: number;
-    lastPointsReset: any; // Using 'any' to accommodate Firestore Timestamp
+    lastPointsReset: Date;
     displayName?: string;
 }
 

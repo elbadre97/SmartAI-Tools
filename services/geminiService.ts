@@ -205,7 +205,7 @@ export const generateContent = async (
           return result;
         } catch (error) {
           lastError = error;
-          console.error(`❌ Failed with ${keyIdentifier}:`, error.message);
+          console.error(`❌ Failed with ${keyIdentifier}:`, error instanceof Error ? error.message : String(error));
           
           if (isKeyRelatedError(error)) {
              console.log(`Key-related error detected. Rotating to the next key.`);
@@ -228,7 +228,7 @@ export const generateContent = async (
     throw lastError || new Error("All API keys failed after multiple retries.");
 
   } catch (error) {
-    console.error("Final Error in generateContent:", error);
+    console.error("Final Error in generateContent:", error instanceof Error ? error.message : String(error));
     if (error instanceof Error) {
         if (error.message === "API_KEY_NOT_FOUND") {
             return lang === 'ar'

@@ -70,7 +70,12 @@ export const getUserProfile = async (uid: string): Promise<UserProfileData | nul
     const userDocRef = doc(db, 'users', uid);
     const docSnap = await getDoc(userDocRef);
     if (docSnap.exists()) {
-        const data = docSnap.data() as UserProfileData;
+        const data = docSnap.data() as {
+            points: number;
+            lastPointsReset: Timestamp;
+            displayName?: string;
+        };
+
         // Check and reset points if the last reset was on a previous day
         if (data.lastPointsReset && isFromPreviousDay(data.lastPointsReset)) {
             await updateDoc(userDocRef, {
@@ -79,7 +84,12 @@ export const getUserProfile = async (uid: string): Promise<UserProfileData | nul
             });
             return { ...data, points: DAILY_POINTS, lastPointsReset: new Date() };
         }
-        return data;
+        
+        // Convert Firestore Timestamp to JS Date for use in the app state
+        return {
+            ...data,
+            lastPointsReset: data.lastPointsReset.toDate(),
+        };
     } else {
         return null;
     }
