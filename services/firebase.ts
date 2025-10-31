@@ -72,7 +72,7 @@ export const createUserProfile = async (uid: string): Promise<UserProfileData> =
 
 export const deductUserPoint = async (uid: string, currentPoints: number): Promise<number> => {
     if (!db) throw new Error("Firestore not initialized");
-    const newPoints = Math.max(0, currentPoints - 1);
+    const newPoints = Math.max(0, currentPoints - 5);
     const userDocRef = doc(db, 'users', uid);
     await updateDoc(userDocRef, { points: newPoints });
     return newPoints;

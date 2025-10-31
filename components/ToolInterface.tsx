@@ -13,6 +13,7 @@ interface ToolInterfaceProps {
   userApiKey: string | null;
   user: User | null;
   onDeductPoint: () => void;
+  onLogin: () => void;
 }
 
 // Define separate limits for different file types to improve user experience and align with API capabilities.
@@ -28,7 +29,7 @@ const mediaFileToBase64 = (file: Blob): Promise<string> => {
     });
 };
 
-export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, mode, userApiKey, user, onDeductPoint }) => {
+export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, mode, userApiKey, user, onDeductPoint, onLogin }) => {
   const [inputValue, setInputValue] = useState('');
   const [outputValue, setOutputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +44,8 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const isFileInput = tool.inputType === 'image' || tool.inputType === 'file';
+
+  const POINTS_PER_GENERATION = 5;
 
   // Determine max file size based on tool type for better UX and to avoid API errors
   const maxFileSize = (() => {
@@ -94,12 +97,17 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   };
 
   const handleGenerate = async () => {
+    if (mode === 'trial' && !user) {
+        onLogin();
+        return;
+    }
+
     if ((isFileInput && !file) || (!isFileInput && !inputValue.trim())) {
       return;
     }
 
-    if (mode === 'trial' && user && user.points <= 0) {
-        setError(t.no_points_error);
+    if (mode === 'trial' && user && user.points < POINTS_PER_GENERATION) {
+        setError(t.not_enough_points_error.replace('{count}', user.points.toString()));
         return;
     }
     
@@ -200,7 +208,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     </div>
   );
 
-  const isButtonDisabled = isLoading || (isFileInput ? !file : !inputValue.trim()) || (mode === 'trial' && user?.points !== undefined && user.points <= 0);
+  const isButtonDisabled = isLoading || (isFileInput ? !file : !inputValue.trim()) || (mode === 'trial' && user?.points !== undefined && user.points < POINTS_PER_GENERATION);
 
   return (
     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up">

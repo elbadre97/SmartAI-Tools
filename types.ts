@@ -4,7 +4,7 @@ export type Language = 'ar' | 'en';
 
 export type CategoryType = 'content' | 'visuals' | 'productivity' | 'development';
 
-export type AppMode = 'free' | 'trial' | 'user_api' | 'premium';
+export type AppMode = 'trial' | 'user_api' | 'premium';
 
 export type ToolType =
   | 'text'

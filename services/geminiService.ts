@@ -8,8 +8,7 @@ const getAiInstance = (mode: AppMode, userApiKey?: string | null): GoogleGenAI =
     if (mode === 'user_api') {
         apiKey = userApiKey || undefined;
     } else {
-        // For 'free' and 'premium' modes, use the project's key.
-        // In a real scenario, 'premium' might use a different, more powerful key/model.
+        // For 'trial' and 'premium' modes, use the project's key.
         apiKey = process.env.API_KEY;
     }
 

@@ -54,14 +54,12 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Modes
     mode: 'وضع التشغيل',
-    mode_free: 'الوضع المجاني',
-    mode_free_desc: 'تجربة أساسية للضيوف.',
     mode_trial: 'الوضع التجريبي',
     mode_trial_desc: '30 محاولة مجانية يوميًا للحسابات المسجلة.',
     mode_user_api: 'مفتاحك الخاص',
     mode_user_api_desc: 'استخدام غير محدود مع مفتاح Gemini API الخاص بك.',
     mode_premium: 'الاشتراك المدفوع',
-    mode_premium_desc: 'قوة كاملة وميزات حصرية. (قريباً)',
+    mode_premium_desc: 'قوة كاملة وميزات حصرية.',
 
     // API Key Modal
     api_key_modal_title: 'إضافة مفتاح Gemini API',
@@ -72,10 +70,36 @@ export const translations: Record<Language, Record<string, string>> = {
     api_key_saved: 'تم حفظ المفتاح!',
     api_key_needed_for_user_mode: 'لاستخدام هذا الوضع، يرجى إضافة مفتاح Gemini API الخاص بك.',
     api_key_get_yours: 'احصل على مفتاحك من Google AI Studio',
+    
+    // Subscription & Payment Modal
+    subscription_modal_title: 'الترقية إلى الاشتراك المدفوع',
+    subscription_modal_subtitle: 'أطلق العنان للإمكانيات الكاملة لأدوات الذكاء الاصطناعي.',
+    premium_feature_1: 'استخدام غير محدود لجميع الأدوات',
+    premium_feature_2: 'سرعة استجابة أعلى',
+    premium_feature_3: 'وصول مبكر للأدوات الجديدة',
+    premium_feature_4: 'دعم فني ذو أولوية',
+    price_per_month: 'شهريًا',
+    subscribe_now_button: 'اشترك الآن مقابل 10$ / شهر',
+    subscription_success_alert: 'شكرًا لاشتراكك! (هذه مجرد محاكاة)',
+    payment_modal_title: 'إتمام الدفع',
+    choose_payment_method: 'اختر طريقة الدفع',
+    pay_with_paypal: 'الدفع بواسطة PayPal',
+    pay_with_card: 'الدفع بالبطاقة',
+    card_number: 'رقم البطاقة',
+    expiry_date: 'تاريخ الانتهاء',
+    cvc: 'CVC',
+    mm_yy: 'MM/YY',
+    confirm_payment_button: 'تأكيد الدفع (10$)',
+    processing_payment: 'جاري معالجة الدفع...',
+    back_button: 'رجوع',
+    invalid_card_number: 'رقم البطاقة غير صالح',
+    invalid_expiry_date: 'تاريخ الانتهاء غير صالح',
+    invalid_cvc: 'CVC غير صالح',
 
     // Points
     points_remaining: 'النقاط: {count}',
     no_points_error: 'لقد استنفدت نقاطك لهذا اليوم. يمكنك العودة غدًا أو التبديل إلى وضع "مفتاحك الخاص".',
+    not_enough_points_error: 'تحتاج إلى 5 نقاط على الأقل للإنشاء. رصيدك الحالي {count} نقطة.',
 
   },
   en: {
@@ -131,14 +155,12 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Modes
     mode: 'Mode',
-    mode_free: 'Free Mode',
-    mode_free_desc: 'Basic experience for guests.',
     mode_trial: 'Trial Mode',
     mode_trial_desc: '30 free daily credits for registered accounts.',
     mode_user_api: 'Your API Key',
     mode_user_api_desc: 'Unlimited usage with your own Gemini API key.',
     mode_premium: 'Premium',
-    mode_premium_desc: 'Full power and exclusive features. (Coming soon)',
+    mode_premium_desc: 'Full power and exclusive features.',
 
     // API Key Modal
     api_key_modal_title: 'Add Your Gemini API Key',
@@ -149,9 +171,35 @@ export const translations: Record<Language, Record<string, string>> = {
     api_key_saved: 'Key Saved!',
     api_key_needed_for_user_mode: 'To use this mode, please add your Gemini API key.',
     api_key_get_yours: 'Get your key from Google AI Studio',
+    
+    // Subscription & Payment Modal
+    subscription_modal_title: 'Upgrade to Premium',
+    subscription_modal_subtitle: 'Unlock the full potential of AI tools.',
+    premium_feature_1: 'Unlimited usage of all tools',
+    premium_feature_2: 'Faster response times',
+    premium_feature_3: 'Early access to new tools',
+    premium_feature_4: 'Priority customer support',
+    price_per_month: 'per month',
+    subscribe_now_button: 'Subscribe Now for $10 / month',
+    subscription_success_alert: 'Thank you for subscribing! (This is a simulation)',
+    payment_modal_title: 'Complete Payment',
+    choose_payment_method: 'Choose Payment Method',
+    pay_with_paypal: 'Pay with PayPal',
+    pay_with_card: 'Pay with Card',
+    card_number: 'Card Number',
+    expiry_date: 'Expiry Date',
+    cvc: 'CVC',
+    mm_yy: 'MM/YY',
+    confirm_payment_button: 'Confirm Payment ($10)',
+    processing_payment: 'Processing Payment...',
+    back_button: 'Back',
+    invalid_card_number: 'Invalid card number',
+    invalid_expiry_date: 'Invalid expiry date',
+    invalid_cvc: 'Invalid CVC',
 
     // Points
     points_remaining: 'Credits: {count}',
     no_points_error: 'You have run out of credits for today. You can come back tomorrow or switch to "Your API Key" mode.',
+    not_enough_points_error: 'You need at least 5 points to generate. You currently have {count} points.',
   },
 };

@@ -7,6 +7,7 @@ import { Stats } from './components/Stats';
 import { CategoryTabs } from './components/CategoryTabs';
 import { LoginModal } from './components/LoginModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
+import { SubscriptionModal } from './components/SubscriptionModal';
 import { TOOLS, CATEGORIES } from './constants';
 import type { Tool, Language, CategoryType, User, AppMode } from './types';
 import { translations } from './translations';
@@ -24,9 +25,10 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
   
-  const [mode, setMode] = useState<AppMode>('free');
+  const [mode, setMode] = useState<AppMode>('trial');
   const [userApiKey, setUserApiKey] = useState<string | null>(null);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
 
   const isAuthEnabled = !!auth;
@@ -75,16 +77,16 @@ export default function App() {
           };
           setUser(appUser);
           
-          if (pendingMode === 'premium') {
-              setMode('premium');
+          if (pendingMode) {
+              handleModeChange(pendingMode, true);
               setPendingMode(null);
-          } else if (pendingMode === 'trial' || !pendingMode) {
+          } else {
               setMode('trial');
-              setPendingMode(null);
           }
+
         } else {
           setUser(null);
-          setMode('free'); // Revert to free for guests
+          setMode('trial'); // Default to trial, which will trigger login on use
         }
         setAuthInitialized(true);
       });
@@ -92,7 +94,7 @@ export default function App() {
     } else {
       setAuthInitialized(true);
       setUser(null);
-      setMode('free');
+      setMode('trial');
     }
   }, [isAuthEnabled, pendingMode]);
 
@@ -108,20 +110,26 @@ export default function App() {
     } else {
         setUserApiKey(null);
         localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
-        if (mode === 'user_api') setMode('free');
+        if (mode === 'user_api') setMode('trial'); // Revert to trial if key is removed
     }
   };
 
-  const handleModeChange = (newMode: AppMode) => {
-    if ((newMode === 'trial' || newMode === 'premium') && !user) {
-        setPendingMode(newMode);
-        setIsLoginModalOpen(true);
-        return;
-    }
-    if (newMode === 'user_api' && !userApiKey) {
-        setPendingMode('user_api');
-        setIsApiKeyModalOpen(true);
-        return;
+  const handleModeChange = (newMode: AppMode, force: boolean = false) => {
+      if (!force) {
+        if (newMode === 'premium') {
+            setIsSubscriptionModalOpen(true);
+            return;
+        }
+        if (newMode === 'trial' && !user) {
+            setPendingMode(newMode);
+            setIsLoginModalOpen(true);
+            return;
+        }
+        if (newMode === 'user_api' && !userApiKey) {
+            setPendingMode('user_api');
+            setIsApiKeyModalOpen(true);
+            return;
+        }
     }
     setMode(newMode);
     setPendingMode(null);
@@ -158,7 +166,7 @@ export default function App() {
     if (!isAuthEnabled || !auth) return;
     try {
       await signOut(auth);
-      // onAuthStateChanged will handle setting user to null and mode to 'free'
+      // onAuthStateChanged will handle setting user to null and mode
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -211,6 +219,7 @@ export default function App() {
                 userApiKey={userApiKey}
                 user={user}
                 onDeductPoint={handleDeductPoint}
+                onLogin={handleLogin}
             />
           </div>
         )}
@@ -235,6 +244,17 @@ export default function App() {
         }}
         onSave={handleSetUserApiKey}
         currentKey={userApiKey}
+        t={t}
+        language={language}
+      />
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        onSubscribe={() => {
+            // Placeholder for actual subscription logic
+            alert(t.subscription_success_alert);
+            setIsSubscriptionModalOpen(false);
+        }}
         t={t}
         language={language}
       />
