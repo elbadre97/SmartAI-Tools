@@ -24,7 +24,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Tool Interface
     generate_button: 'إنشاء',
-    extract_text_button: 'استخراج النص',
+    extract_text_button: 'استخراج وتحليل',
     output_placeholder: 'ستظهر النتيجة هنا...',
     copy_button: 'نسخ',
     copied_button: 'تم النسخ!',
@@ -39,6 +39,10 @@ export const translations: Record<Language, Record<string, string>> = {
     unsupported_file: 'نوع الملف غير مدعوم',
     file_too_large: 'حجم الملف كبير جدًا. الحد الأقصى {size} ميجابايت.',
     max_file_size: 'الحد الأقصى للحجم: {size} ميجابايت',
+    output_summary: 'الملخص',
+    output_topics: 'المواضيع الرئيسية',
+    output_transcript: 'النص الكامل',
+    json_parse_error: 'حدث خطأ أثناء معالجة النتيجة. قد تكون استجابة الذكاء الاصطناعي غير صالحة.',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} أدوات ذكية. جميع الحقوق محفوظة.`,
@@ -50,7 +54,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_with_google: 'تسجيل الدخول باستخدام جوجل',
     login_error: 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.',
     auth_not_configured: 'خدمة المصادقة غير مهيأة حاليًا.',
-    auth_api_not_enabled_error: 'خطأ في الإعداد: خدمة المصادقة (Identity Toolkit API) غير مفعلة لهذا المشروع. يرجى تفعيلها من Google Cloud Console.',
+    auth_api_not_enabled_error: 'خطأ في الإعداد: خدمة المصادقة (Identity Toolkit API) غير مفعلة لهذا المشروع. يرجى تفعيلها من',
+    auth_api_not_enabled_error_link_text: 'Google Cloud Console',
     
     // Modes
     mode: 'وضع التشغيل',
@@ -130,7 +135,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Tool Interface
     generate_button: 'Generate',
-    extract_text_button: 'Extract Text',
+    extract_text_button: 'Extract & Analyze',
     output_placeholder: 'The result will appear here...',
     copy_button: 'Copy',
     copied_button: 'Copied!',
@@ -145,6 +150,10 @@ export const translations: Record<Language, Record<string, string>> = {
     unsupported_file: 'Unsupported file type',
     file_too_large: 'File is too large. Max size is {size}MB.',
     max_file_size: 'Max file size: {size}MB',
+    output_summary: 'Summary',
+    output_topics: 'Key Topics',
+    output_transcript: 'Full Transcript',
+    json_parse_error: 'An error occurred while processing the result. The AI response might be invalid.',
 
     // Footer
     footer_copyright: `© ${new Date().getFullYear()} Smart Tools. All rights reserved.`,
@@ -156,7 +165,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login_with_google: 'Sign in with Google',
     login_error: 'An error occurred during sign-in. Please try again.',
     auth_not_configured: 'Authentication service is not configured.',
-    auth_api_not_enabled_error: 'Configuration Error: The Identity Toolkit API is not enabled for this project. Please enable it in the Google Cloud Console.',
+    auth_api_not_enabled_error: 'Configuration Error: The Identity Toolkit API is not enabled for this project. Please enable it in the',
+    auth_api_not_enabled_error_link_text: 'Google Cloud Console',
 
     // Modes
     mode: 'Mode',

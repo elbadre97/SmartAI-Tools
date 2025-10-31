@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Tool, Language, AppMode, User } from '../types';
+import type { Tool, Language, AppMode, User, VideoOutput } from '../types';
 import { generateContent } from '../services/geminiService';
 import { Spinner } from './icons/Spinner';
 import { CloseIcon, CopyIcon, ClearIcon, PasteIcon, UploadIcon } from './icons/ActionIcons';
+import { StructuredVideoOutput } from './StructuredVideoOutput';
 
 interface ToolInterfaceProps {
   tool: Tool;
@@ -32,6 +33,7 @@ const mediaFileToBase64 = (file: Blob): Promise<string> => {
 export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, mode, userApiKey, user, onDeductPoint, onLogin }) => {
   const [inputValue, setInputValue] = useState('');
   const [outputValue, setOutputValue] = useState('');
+  const [structuredOutput, setStructuredOutput] = useState<VideoOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingText, setLoadingText] = useState('');
@@ -64,6 +66,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const resetState = () => {
     setInputValue('');
     setOutputValue('');
+    setStructuredOutput(null);
     setError(null);
     setFile(null);
     setFilePreview(null);
@@ -114,6 +117,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     setIsLoading(true);
     setError(null);
     setOutputValue('');
+    setStructuredOutput(null);
     setLoadingText(tool.loadingText[language]);
     
     try {
@@ -127,11 +131,25 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
       
       const isErrorResult = result.includes('خطأ') || result.includes('Error') || result.includes('not valid') || result.includes('غير صالح') || result.includes('required');
 
-      if (isErrorResult) {
+      if (tool.id === 'video_text_extractor' && !isErrorResult) {
+          try {
+              const parsedResult: VideoOutput = JSON.parse(result.trim());
+              setStructuredOutput(parsedResult);
+              setOutputValue(''); // Don't show raw JSON
+              if (mode === 'trial') onDeductPoint();
+          } catch (jsonError) {
+              console.error("Failed to parse JSON output:", jsonError, "Raw result:", result);
+              setError(t.json_parse_error);
+              setOutputValue('');
+              setStructuredOutput(null);
+          }
+      } else if (isErrorResult) {
           setOutputValue('');
           setError(result);
+          setStructuredOutput(null);
       } else {
           setOutputValue(result);
+          setStructuredOutput(null);
           if (mode === 'trial') {
               onDeductPoint();
           }
@@ -156,6 +174,20 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   };
   
   const handleCopy = () => {
+    if (structuredOutput) {
+        const { summary, topics, transcript } = structuredOutput;
+        const textToCopy = `
+${t.output_summary.toUpperCase()}:\n${summary}\n
+${t.output_topics.toUpperCase()}:\n- ${topics.join('\n- ')}\n
+${t.output_transcript.toUpperCase()}:\n${transcript}
+        `.trim();
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+        return;
+    }
+
     if (!outputValue) return;
     const textToCopy = outputRef.current?.innerText || '';
     if (!textToCopy) return;
@@ -263,12 +295,12 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
           <div className="flex justify-between items-center">
             <label className="font-semibold">{language === 'ar' ? 'النتيجة' : 'Output'}</label>
             <div className="flex gap-1">
-                {outputValue && !isOutputImage && (
+                {(outputValue || structuredOutput) && !isOutputImage && (
                     <>
                         <button onClick={handleCopy} title={isCopied ? t.copied_button : t.copy_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white">
                             {isCopied ? '✅' : <CopyIcon />}
                         </button>
-                        <button onClick={() => setOutputValue('')} title={t.clear_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white">
+                        <button onClick={() => { setOutputValue(''); setStructuredOutput(null); }} title={t.clear_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white">
                             <ClearIcon />
                         </button>
                     </>
@@ -282,18 +314,23 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
                 <p className="mt-2 text-sm opacity-80">{loadingText || tool.loadingText[language]}</p>
               </div>
             )}
-            {!isLoading && !outputValue && (
+            {!isLoading && !outputValue && !structuredOutput && (
               <div className="text-white/50 h-full flex items-center justify-center">{t.output_placeholder}</div>
             )}
-            <div ref={outputRef} className="w-full h-full">
-                {outputValue && (
-                    isOutputImage ? (
-                        <img src={outputValue} alt="Generated output" className="w-full h-full object-contain rounded-lg" />
-                    ) : (
-                        <pre className="whitespace-pre-wrap text-sm font-sans">{outputValue}</pre>
-                    )
-                )}
-            </div>
+
+            {structuredOutput ? (
+                <StructuredVideoOutput data={structuredOutput} t={t} outputRef={outputRef}/>
+            ) : (
+              <div ref={outputRef} className="w-full h-full">
+                  {outputValue && (
+                      isOutputImage ? (
+                          <img src={outputValue} alt="Generated output" className="w-full h-full object-contain rounded-lg" />
+                      ) : (
+                          <pre className="whitespace-pre-wrap text-sm font-sans">{outputValue}</pre>
+                      )
+                  )}
+              </div>
+            )}
           </div>
         </div>
       </div>

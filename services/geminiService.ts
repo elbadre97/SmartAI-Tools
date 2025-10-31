@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, Type } from "@google/genai";
 import type { ToolType, Language, AppMode } from '../types';
 
 const MAX_RETRIES = 3; // Number of retry attempts
@@ -9,7 +9,28 @@ const createAiInstance = (apiKey: string): GoogleGenAI => {
     return new GoogleGenAI({ apiKey });
 };
 
-// Prompts remain the same
+const videoExtractorSchema = {
+    type: Type.OBJECT,
+    properties: {
+        transcript: {
+            type: Type.STRING,
+            description: "The full, verbatim transcript of all spoken words in the video.",
+        },
+        summary: {
+            type: Type.STRING,
+            description: "A concise summary of the video's content, capturing the main points.",
+        },
+        topics: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.STRING,
+            },
+            description: "A list of the key topics or themes discussed in the video.",
+        },
+    },
+    required: ["transcript", "summary", "topics"],
+};
+
 const prompts: Record<Language, Partial<Record<ToolType, (input: string) => string>>> = {
   ar: {
     text: (input: string) => `أنشئ نصًا إبداعيًا ومفصلاً باللغة العربية بناءً على الفكرة التالية: "${input}"`,
@@ -20,7 +41,7 @@ const prompts: Record<Language, Partial<Record<ToolType, (input: string) => stri
     long_video_script: (input: string) => `اكتب سكريبت احترافي ومفصل لفيديو طويل على يوتيوب حول الموضوع التالي. يجب أن يتضمن السكريبت مقدمة جذابة، محتوى مقسم إلى فقرات، وخاتمة قوية. الموضوع: "${input}"`,
     short_video_script: (input: string) => `اكتب سكريبت جذاب ومختصر لفيديو قصير (مثل تيك توك أو ريلز) حول الفكرة التالية. يجب أن يكون سريع الإيقاع ومناسب للمشاهدة على الهاتف. الفكرة: "${input}"`,
     image_prompt_extractor: (input: string) => `صف هذه الصورة بالتفصيل. يجب أن يكون الوصف دقيقًا وغنيًا بالكلمات المفتاحية بحيث يمكن استخدامه كـ "برومبت" (أمر) لإنشاء صورة مشابهة لها بواسطة مولد صور آخر يعمل بالذكاء الاصطناعي.`,
-    video_text_extractor: (input: string) => `استخرج النص الكامل المنطوق في هذا الفيديو. قم بتوفير النص فقط بدون أي تعليقات إضافية.`,
+    video_text_extractor: (input: string) => `حلل هذا الفيديو وقدم نصًا كاملاً وملخصًا موجزًا وقائمة بالمواضيع الرئيسية. أعد النتيجة ككائن JSON يحتوي على مفاتيح 'transcript' و 'summary' و 'topics'.`,
   },
   en: {
     text: (input: string) => `Generate a creative and detailed text in English based on the following idea: "${input}"`,
@@ -31,7 +52,7 @@ const prompts: Record<Language, Partial<Record<ToolType, (input: string) => stri
     long_video_script: (input: string) => `Write a professional and detailed script for a long-form YouTube video about the following topic. The script should include an engaging intro, content divided into sections, and a strong conclusion. Topic: "${input}"`,
     short_video_script: (input: string) => `Write a catchy and concise script for a short video (like TikTok or Reels) about the following idea. It should be fast-paced and suitable for mobile viewing. Idea: "${input}"`,
     image_prompt_extractor: (input: string) => `Describe this image in detail. The description should be precise and rich with keywords, suitable for use as a 'prompt' to generate a similar image with another AI image generator.`,
-    video_text_extractor: (input: string) => `Extract the full spoken text from this video. Provide only the transcription without any additional commentary.`,
+    video_text_extractor: (input: string) => `Analyze this video and provide a full transcript, a concise summary, and a list of key topics. Return the result as a JSON object with 'transcript', 'summary', and 'topics' keys.`,
   }
 };
 
@@ -121,6 +142,10 @@ const executeApiCall = async (aiInstance: GoogleGenAI, toolType: ToolType, input
         const response = await aiInstance.models.generateContent({
             model: 'gemini-2.5-pro',
             contents: { parts: [videoPart, textPart] },
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: videoExtractorSchema,
+            }
         });
         return response.text;
     } else {

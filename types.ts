@@ -58,3 +58,9 @@ export interface Tool {
   inputType: InputType;
   disabled?: boolean;
 }
+
+export interface VideoOutput {
+  summary: string;
+  topics: string[];
+  transcript: string;
+}
