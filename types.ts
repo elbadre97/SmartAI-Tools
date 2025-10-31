@@ -4,8 +4,6 @@ export type Language = 'ar' | 'en';
 
 export type CategoryType = 'content' | 'visuals' | 'productivity' | 'development';
 
-export type AppMode = 'trial' | 'user_api' | 'premium';
-
 export type ToolType =
   | 'text'
   | 'long_video_script'
@@ -26,20 +24,6 @@ export type ToolType =
 export type InputType = 'text' | 'image' | 'file';
 
 export type LocalizedString = Record<Language, string>;
-
-export interface User {
-  uid: string;
-  name: LocalizedString;
-  email: string;
-  photoURL: string;
-  points: number;
-}
-
-export interface UserProfileData {
-    points: number;
-    lastPointsReset: Date;
-    displayName?: string;
-}
 
 export interface Category {
   id: CategoryType;
@@ -64,4 +48,21 @@ export interface VideoOutput {
   summary: string;
   topics: string[];
   transcript: string;
+}
+
+// FIX: Added missing type definitions for User, AppMode, and UserProfileData to resolve import errors across multiple components.
+export type AppMode = 'trial' | 'user_api' | 'premium';
+
+export interface UserProfileData {
+  points: number;
+  lastPointsReset: Date;
+  displayName?: string | null;
+}
+
+export interface User {
+  uid: string;
+  name: LocalizedString;
+  email: string | null;
+  photoURL: string;
+  points: number;
 }

@@ -1,23 +1,12 @@
 import React from 'react';
-import type { Language, User, AppMode } from '../types';
-import { UserMenu } from './UserMenu';
-import { ModeSelector } from './ModeSelector';
+import type { Language } from '../types';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   language: Language;
   toggleLanguage: () => void;
-  user: User | null;
-  onLogin: () => void;
-  onLogout: () => void;
-  onSubscribe: () => void;
-  authInitialized: boolean;
-  isAuthEnabled: boolean;
-  mode: AppMode;
-  onModeChange: (mode: AppMode) => void;
   onApiKeySettings: () => void;
-  userApiKey: string | null;
   t: Record<string, string>;
 }
 
@@ -26,7 +15,7 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
 );
 
 export const Header: React.FC<HeaderProps> = ({ 
-    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, onSubscribe, authInitialized, isAuthEnabled, mode, onModeChange, onApiKeySettings, userApiKey, t
+    theme, toggleTheme, language, toggleLanguage, onApiKeySettings, t
 }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -62,24 +51,14 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            {user && mode === 'trial' && (
-              <div 
-                className="bg-white/10 text-sm font-semibold px-3 py-1.5 rounded-full flex items-center gap-2" 
-                title={t.points_remaining.replace('{count}', user.points.toString())}
-              >
-                  <span>💎</span>
-                  <span>{user.points}</span>
-              </div>
-            )}
-             <ModeSelector 
-                mode={mode}
-                onModeChange={onModeChange}
-                language={language}
-                t={t}
-                userApiKey={userApiKey}
-                onApiKeySettings={onApiKeySettings}
-             />
-
+            <button
+              onClick={onApiKeySettings}
+              className="p-2 rounded-full hover:bg-white/20 transition-colors w-10 h-10 flex items-center justify-center"
+              aria-label={t.api_key_modal_title}
+              title={t.api_key_modal_title}
+            >
+              <span className="text-xl">🔑</span>
+            </button>
             <button
               onClick={toggleLanguage}
               className="p-2 rounded-full hover:bg-white/20 transition-colors w-10 h-10 flex items-center justify-center"
@@ -94,38 +73,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <ThemeIcon theme={theme} />
             </button>
-
-            <div className="w-px h-6 bg-white/20 mx-2"></div>
-
-            {!authInitialized && (
-              <div className="w-24 h-9 rounded-full bg-white/20 animate-pulse"></div>
-            )}
-            {authInitialized && (
-              <>
-                {user ? (
-                  <>
-                    {mode === 'trial' && (
-                      <button
-                        onClick={onSubscribe}
-                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-full transition-all text-sm shadow-lg"
-                      >
-                        {t.subscribe_button}
-                      </button>
-                    )}
-                    <UserMenu user={user} onLogout={onLogout} t={t} language={language} mode={mode} />
-                  </>
-                ) : (
-                  <button
-                    onClick={onLogin}
-                    disabled={!isAuthEnabled}
-                    className="bg-gradient-to-r from-teal-400 to-blue-500 text-white font-bold px-5 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-500 disabled:to-gray-600"
-                    title={!isAuthEnabled ? t.auth_disabled_tooltip : ''}
-                  >
-                    {t.login}
-                  </button>
-                )}
-              </>
-            )}
           </div>
         </div>
       </div>

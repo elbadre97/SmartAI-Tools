@@ -1,8 +1,5 @@
 import { GoogleGenAI, Modality, Type } from "@google/genai";
-import type { ToolType, Language, AppMode } from '../types';
-
-const MAX_RETRIES = 3; // Number of retry attempts
-const RETRY_DELAY = 1000; // Delay between retries in milliseconds
+import type { ToolType, Language } from '../types';
 
 // A helper to create a new AI instance.
 const createAiInstance = (apiKey: string): GoogleGenAI => {
@@ -170,75 +167,21 @@ export const generateContent = async (
     toolType: ToolType,
     input: string | { data: string; mimeType: string },
     lang: Language,
-    mode: AppMode,
-    userApiKey?: string | null
+    userApiKey: string | null
 ): Promise<string> => {
   try {
-    if (mode === 'user_api') {
-      if (!userApiKey) {
-        throw new Error("USER_API_KEY_NOT_FOUND");
-      }
-      const aiInstance = createAiInstance(userApiKey);
-      return await executeApiCall(aiInstance, toolType, input, lang);
+    if (!userApiKey) {
+      throw new Error("USER_API_KEY_NOT_FOUND");
     }
-    
-    // For 'trial' and 'premium' modes, use the key pool with rotation and retry logic.
-    const apiKeys = (process.env.API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-
-    if (apiKeys.length === 0) {
-      throw new Error("API_KEY_NOT_FOUND");
-    }
-
-    let lastError: any = null;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      console.log(`--- Starting API call attempt #${attempt} ---`);
-      for (let i = 0; i < apiKeys.length; i++) {
-        const key = apiKeys[i];
-        const keyIdentifier = `Key ${i + 1} (...${key.slice(-4)})`;
-        console.log(`Trying with ${keyIdentifier}`);
-
-        try {
-          const aiInstance = createAiInstance(key);
-          const result = await executeApiCall(aiInstance, toolType, input, lang);
-          console.log(`✅ Success with ${keyIdentifier}`);
-          return result;
-        } catch (error) {
-          lastError = error;
-          console.error(`❌ Failed with ${keyIdentifier}:`, error instanceof Error ? error.message : String(error));
-          
-          if (isKeyRelatedError(error)) {
-             console.log(`Key-related error detected. Rotating to the next key.`);
-             continue; // Try next key
-          } else {
-            // For non-key related errors (e.g., bad input), fail fast.
-            console.error("Non-key related error. Failing fast.");
-            throw error;
-          }
-        }
-      }
-
-      if (attempt < MAX_RETRIES) {
-        console.warn(`All keys failed on attempt #${attempt}. Retrying after ${RETRY_DELAY}ms...`);
-        await new Promise(res => setTimeout(res, RETRY_DELAY));
-      }
-    }
-
-    console.error("All API keys and retries failed.");
-    throw lastError || new Error("All API keys failed after multiple retries.");
-
+    const aiInstance = createAiInstance(userApiKey);
+    return await executeApiCall(aiInstance, toolType, input, lang);
   } catch (error) {
     console.error("Final Error in generateContent:", error instanceof Error ? error.message : String(error));
     if (error instanceof Error) {
-        if (error.message === "API_KEY_NOT_FOUND") {
-            return lang === 'ar'
-            ? "خطأ في الإعداد: مفتاح API غير موجود. يرجى التأكد من تكوين بيئة التشغيل بشكل صحيح."
-            : "Configuration Error: API Key not found. Please ensure your environment is set up correctly.";
-        }
         if (error.message === "USER_API_KEY_NOT_FOUND") {
             return lang === 'ar'
-                ? "مفتاح API الخاص بك مطلوب. يرجى إضافته في إعدادات وضع التشغيل."
-                : "Your API Key is required. Please add it in the mode settings.";
+                ? "مفتاح API الخاص بك مطلوب. يرجى إضافته في الإعدادات."
+                : "Your API Key is required. Please add it in the settings.";
         }
         if (isKeyRelatedError(error)) {
              return lang === 'ar'

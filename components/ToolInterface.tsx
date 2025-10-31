@@ -1,22 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Tool, Language, AppMode, User, VideoOutput } from '../types';
+import type { Tool, Language, VideoOutput } from '../types';
 import { generateContent } from '../services/geminiService';
 import { Spinner } from './icons/Spinner';
 import { CloseIcon, CopyIcon, ClearIcon, PasteIcon, UploadIcon, SaveIcon } from './icons/ActionIcons';
 import { StructuredVideoOutput } from './StructuredVideoOutput';
-import { POINTS_PER_GENERATION } from '../constants';
-
 
 interface ToolInterfaceProps {
   tool: Tool;
   onClose: () => void;
   language: Language;
   t: Record<string, string>;
-  mode: AppMode;
   userApiKey: string | null;
-  user: User | null;
-  onDeductPoint: (amount: number) => void;
-  onLogin: () => void;
 }
 
 // Define separate limits for different file types to improve user experience and align with API capabilities.
@@ -32,7 +26,7 @@ const mediaFileToBase64 = (file: Blob): Promise<string> => {
     });
 };
 
-export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, mode, userApiKey, user, onDeductPoint, onLogin }) => {
+export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, language, t, userApiKey }) => {
   const [inputValue, setInputValue] = useState('');
   const [outputValue, setOutputValue] = useState('');
   const [structuredOutput, setStructuredOutput] = useState<VideoOutput | null>(null);
@@ -100,18 +94,13 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   };
 
   const handleGenerate = async () => {
-    if (mode === 'trial' && !user) {
-        onLogin();
+    if (!userApiKey) {
+        setError(t.api_key_required_error);
         return;
     }
 
     if ((isFileInput && !file) || (!isFileInput && !inputValue.trim())) {
       return;
-    }
-
-    if (mode === 'trial' && user && user.points < POINTS_PER_GENERATION) {
-        setError(t.not_enough_points_error.replace('{cost}', POINTS_PER_GENERATION.toString()).replace('{count}', user.points.toString()));
-        return;
     }
     
     setIsLoading(true);
@@ -124,9 +113,9 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
       let result;
       if (isFileInput && file) {
         const base64Data = await mediaFileToBase64(file);
-        result = await generateContent(tool.id, { data: base64Data, mimeType: file.type }, language, mode, userApiKey);
+        result = await generateContent(tool.id, { data: base64Data, mimeType: file.type }, language, userApiKey);
       } else {
-        result = await generateContent(tool.id, inputValue, language, mode, userApiKey);
+        result = await generateContent(tool.id, inputValue, language, userApiKey);
       }
       
       const isErrorResult = result.includes('خطأ') || result.includes('Error') || result.includes('not valid') || result.includes('غير صالح') || result.includes('required');
@@ -136,7 +125,6 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
               const parsedResult: VideoOutput = JSON.parse(result.trim());
               setStructuredOutput(parsedResult);
               setOutputValue(''); // Don't show raw JSON
-              if (mode === 'trial') onDeductPoint(POINTS_PER_GENERATION);
           } catch (jsonError) {
               console.error("Failed to parse JSON output:", jsonError, "Raw result:", result);
               setError(t.json_parse_error);
@@ -150,9 +138,6 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
       } else {
           setOutputValue(result);
           setStructuredOutput(null);
-          if (mode === 'trial') {
-              onDeductPoint(POINTS_PER_GENERATION);
-          }
       }
 
     } catch (e) {
@@ -253,7 +238,7 @@ ${t.output_transcript.toUpperCase()}:\n${transcript}
     </div>
   );
 
-  const isButtonDisabled = isLoading || (isFileInput ? !file : !inputValue.trim()) || (mode === 'trial' && user?.points !== undefined && user.points < POINTS_PER_GENERATION);
+  const isButtonDisabled = isLoading || (isFileInput ? !file : !inputValue.trim()) || !userApiKey;
 
   return (
     <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6 md:p-8 animate-fade-in-up">
