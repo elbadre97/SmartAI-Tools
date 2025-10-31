@@ -59,50 +59,48 @@ export default function App() {
     }
   }, []);
 
+  // Effect to handle Firebase auth state changes.
   useEffect(() => {
-    if (isAuthEnabled && auth) {
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-        if (firebaseUser) {
-          let userProfile = await getUserProfile(firebaseUser.uid);
-          
-          // If a user is authenticated but has no profile in Firestore (e.g., first-time Google sign-in), create one.
-          if (!userProfile) {
-            userProfile = await createUserProfile(firebaseUser.uid, firebaseUser.displayName || undefined);
-          }
-          
-          // Use the displayName from the auth profile, but fall back to the one from our database.
-          // This solves the race condition where the auth profile isn't updated instantly after sign-up.
-          const displayName = firebaseUser.displayName || userProfile?.displayName;
-
-          const appUser: User = {
-            uid: firebaseUser.uid,
-            name: { ar: displayName || 'مستخدم', en: displayName || 'User' },
-            email: firebaseUser.email || '',
-            photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
-            points: userProfile.points,
-          };
-          setUser(appUser);
-          
-          if (pendingMode) {
-              handleModeChange(pendingMode, true);
-              setPendingMode(null);
-          } else {
-              setMode('trial');
-          }
-
-        } else {
-          setUser(null);
-          setMode('trial'); // Default to trial, which will trigger login on use
-        }
-        setAuthInitialized(true);
-      });
-      return () => unsubscribe();
-    } else {
+    if (!isAuthEnabled || !auth) {
       setAuthInitialized(true);
       setUser(null);
       setMode('trial');
+      return;
     }
-  }, [isAuthEnabled, pendingMode]);
+    
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        let userProfile = await getUserProfile(firebaseUser.uid);
+        if (!userProfile) {
+          userProfile = await createUserProfile(firebaseUser.uid, firebaseUser.displayName || undefined);
+        }
+        const displayName = firebaseUser.displayName || userProfile?.displayName;
+        const appUser: User = {
+          uid: firebaseUser.uid,
+          name: { ar: displayName || 'مستخدم', en: displayName || 'User' },
+          email: firebaseUser.email || '',
+          photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
+          points: userProfile.points,
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+        setMode('trial'); // Default to trial if logged out
+      }
+      setAuthInitialized(true);
+    });
+    
+    return () => unsubscribe();
+  }, [isAuthEnabled]);
+
+  // Effect to handle pending mode changes after authentication.
+  useEffect(() => {
+    // If a user has logged in and there was a pending mode change, trigger it now.
+    if (user && pendingMode) {
+      handleModeChange(pendingMode);
+      setPendingMode(null);
+    }
+  }, [user, pendingMode]);
 
   const handleSetUserApiKey = (key: string) => {
     const newKey = key.trim();
@@ -120,26 +118,30 @@ export default function App() {
     }
   };
 
-  const handleModeChange = (newMode: AppMode, force: boolean = false) => {
-      if (!force) {
-        if (newMode === 'premium') {
-            setIsSubscriptionModalOpen(true);
-            return;
-        }
-        if (newMode === 'trial' && !user) {
-            setPendingMode(newMode);
-            setIsLoginModalOpen(true);
-            return;
-        }
-        if (newMode === 'user_api' && !userApiKey) {
-            setPendingMode('user_api');
-            setIsApiKeyModalOpen(true);
-            return;
-        }
+  const handleModeChange = (newMode: AppMode) => {
+    // For modes that require a user to be logged in
+    if ((newMode === 'premium' || newMode === 'trial') && !user) {
+        setPendingMode(newMode);
+        setIsLoginModalOpen(true);
+        return;
     }
+    // For modes that require an API key
+    if (newMode === 'user_api' && !userApiKey) {
+        setPendingMode('user_api');
+        setIsApiKeyModalOpen(true);
+        return;
+    }
+    // For premium mode, open subscription modal
+    if (newMode === 'premium') {
+        setIsSubscriptionModalOpen(true);
+        // The mode is set in the onSubscribe callback, not here.
+        return;
+    }
+    // For other modes, set directly
     setMode(newMode);
     setPendingMode(null);
   };
+
 
   const handleDeductPoint = async () => {
     if (user && mode === 'trial' && user.points > 0) {
@@ -237,7 +239,10 @@ export default function App() {
       <Footer t={t} />
       {isLoginModalOpen && (
         <LoginModal 
-          onClose={() => setIsLoginModalOpen(false)}
+          onClose={() => {
+            setIsLoginModalOpen(false);
+            setPendingMode(null); // Clear pending action if user closes the modal
+          }}
           t={t}
           language={language}
         />
@@ -260,6 +265,7 @@ export default function App() {
             // Placeholder for actual subscription logic
             alert(t.subscription_success_alert);
             setIsSubscriptionModalOpen(false);
+            setMode('premium'); // Set mode to premium after successful subscription
         }}
         t={t}
         language={language}
