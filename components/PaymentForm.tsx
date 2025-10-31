@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Language } from '../types';
-import { PayPalIcon, VisaIcon } from './icons/PaymentIcons';
+import { PayPalIcon, VisaIcon, WooCommerceIcon } from './icons/PaymentIcons';
 import { Spinner } from './icons/Spinner';
 
 interface PaymentFormProps {
@@ -11,7 +11,7 @@ interface PaymentFormProps {
 }
 
 export const PaymentForm: React.FC<PaymentFormProps> = ({ t, onBack, onSuccess }) => {
-    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'woocommerce'>('card');
     const [isLoading, setIsLoading] = useState(false);
     
     const [cardNumber, setCardNumber] = useState('');
@@ -23,29 +23,33 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ t, onBack, onSuccess }
         const newErrors = { cardNumber: '', expiry: '', cvc: '' };
         let isValid = true;
         
-        if (cardNumber.replace(/\s/g, '').length !== 16) {
-            newErrors.cardNumber = t.invalid_card_number;
-            isValid = false;
+        if (paymentMethod === 'card') {
+            if (cardNumber.replace(/\s/g, '').length !== 16) {
+                newErrors.cardNumber = t.invalid_card_number;
+                isValid = false;
+            }
+            if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiry)) {
+                newErrors.expiry = t.invalid_expiry_date;
+                isValid = false;
+            }
+            if (cvc.length < 3 || cvc.length > 4) {
+                newErrors.cvc = t.invalid_cvc;
+                isValid = false;
+            }
         }
-        if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiry)) {
-            newErrors.expiry = t.invalid_expiry_date;
-            isValid = false;
-        }
-        if (cvc.length < 3 || cvc.length > 4) {
-            newErrors.cvc = t.invalid_cvc;
-            isValid = false;
-        }
+        
         setErrors(newErrors);
         return isValid;
     };
 
     const handleConfirmPayment = (e: React.FormEvent) => {
         e.preventDefault();
-        if (paymentMethod === 'card' && !validateForm()) {
+        if (!validateForm()) {
             return;
         }
         
         setIsLoading(true);
+        // Simulate API call
         setTimeout(() => {
             setIsLoading(false);
             onSuccess();
@@ -64,11 +68,19 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ t, onBack, onSuccess }
         }
         setExpiry(value);
     };
+    
+    const formInputClasses = "w-full bg-white/50 dark:bg-gray-700/50 rounded-lg p-3 focus:ring-2 focus:ring-purple-400 focus:outline-none transition-colors border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white";
+
+    const confirmButtonText = {
+        card: t.confirm_payment_button,
+        paypal: t.proceed_to_paypal,
+        woocommerce: t.proceed_to_woocommerce,
+    }[paymentMethod];
 
     return (
         <form onSubmit={handleConfirmPayment} className="animate-fade-in">
             <p className="text-gray-600 dark:text-gray-300 mb-4 text-center">{t.choose_payment_method}</p>
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6">
                 <PaymentMethodButton
                     label={t.pay_with_card}
                     icon={<VisaIcon />}
@@ -81,21 +93,37 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ t, onBack, onSuccess }
                     isActive={paymentMethod === 'paypal'}
                     onClick={() => setPaymentMethod('paypal')}
                 />
+                 <PaymentMethodButton
+                    label={t.pay_with_woocommerce}
+                    icon={<WooCommerceIcon />}
+                    isActive={paymentMethod === 'woocommerce'}
+                    onClick={() => setPaymentMethod('woocommerce')}
+                />
             </div>
 
-            {paymentMethod === 'card' && (
+            {paymentMethod === 'card' ? (
                 <div className="space-y-4 mb-6 animate-fade-in-up">
                     <InputField label={t.card_number} error={errors.cardNumber}>
-                        <input type="text" value={cardNumber} onChange={handleCardNumberChange} placeholder="0000 0000 0000 0000" className="form-input" />
+                        <input type="tel" value={cardNumber} onChange={handleCardNumberChange} placeholder="0000 0000 0000 0000" className={formInputClasses} autoComplete="cc-number" inputMode="numeric" />
                     </InputField>
                     <div className="flex gap-4">
-                        <InputField label={t.expiry_date} error={errors.expiry}>
-                           <input type="text" value={expiry} onChange={handleExpiryChange} placeholder={t.mm_yy} className="form-input" />
-                        </InputField>
-                         <InputField label={t.cvc} error={errors.cvc}>
-                           <input type="text" value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="123" className="form-input" />
-                        </InputField>
+                        <div className="w-2/3">
+                            <InputField label={t.expiry_date} error={errors.expiry}>
+                               <input type="tel" value={expiry} onChange={handleExpiryChange} placeholder={t.mm_yy} className={formInputClasses} autoComplete="cc-exp" inputMode="numeric" />
+                            </InputField>
+                        </div>
+                         <div className="w-1/3">
+                            <InputField label={t.cvc} error={errors.cvc}>
+                               <input type="tel" value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="123" className={formInputClasses} autoComplete="cc-csc" inputMode="numeric" />
+                            </InputField>
+                        </div>
                     </div>
+                </div>
+            ) : (
+                <div className="text-center p-4 my-6 bg-black/5 dark:bg-white/10 rounded-lg animate-fade-in-up">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                        {t.payment_redirect_message.replace('{service}', paymentMethod === 'paypal' ? 'PayPal' : 'WooCommerce')}
+                    </p>
                 </div>
             )}
             
@@ -110,7 +138,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ t, onBack, onSuccess }
                             <span className="ltr:ml-2 rtl:mr-2">{t.processing_payment}</span>
                         </>
                     ) : (
-                        <span>{t.confirm_payment_button}</span>
+                        <span>{confirmButtonText}</span>
                     )}
                 </button>
             </div>
@@ -122,12 +150,12 @@ const PaymentMethodButton: React.FC<{ label: string; icon: React.ReactNode; isAc
     <button
         type="button"
         onClick={onClick}
-        className={`w-full flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${
+        className={`w-full flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all h-full ${
             isActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
         }`}
     >
         {icon}
-        <span className="text-sm font-semibold text-gray-700 dark:text-white">{label}</span>
+        <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-white">{label}</span>
     </button>
 );
 
