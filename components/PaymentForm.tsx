@@ -151,11 +151,17 @@ const PaymentMethodButton: React.FC<{ label: string; icon: React.ReactNode; isAc
         type="button"
         onClick={onClick}
         className={`w-full flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all h-full ${
-            isActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400'
+            isActive 
+                ? 'border-indigo-500 dark:border-purple-500 bg-indigo-100 dark:bg-purple-500/20' 
+                : 'border-gray-300 dark:border-gray-600 bg-transparent hover:border-indigo-400 dark:hover:border-purple-400'
         }`}
     >
         {icon}
-        <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-white">{label}</span>
+        <span className={`text-xs sm:text-sm font-semibold transition-colors ${
+            isActive 
+                ? 'text-indigo-700 dark:text-purple-100' 
+                : 'text-gray-700 dark:text-gray-300'
+        }`}>{label}</span>
     </button>
 );
 
