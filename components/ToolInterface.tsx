@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { Tool, Language, AppMode, User, VideoOutput } from '../types';
 import { generateContent } from '../services/geminiService';
 import { Spinner } from './icons/Spinner';
-import { CloseIcon, CopyIcon, ClearIcon, PasteIcon, UploadIcon } from './icons/ActionIcons';
+import { CloseIcon, CopyIcon, ClearIcon, PasteIcon, UploadIcon, SaveIcon } from './icons/ActionIcons';
 import { StructuredVideoOutput } from './StructuredVideoOutput';
+import { POINTS_PER_GENERATION } from '../constants';
+
 
 interface ToolInterfaceProps {
   tool: Tool;
@@ -13,7 +15,7 @@ interface ToolInterfaceProps {
   mode: AppMode;
   userApiKey: string | null;
   user: User | null;
-  onDeductPoint: () => void;
+  onDeductPoint: (amount: number) => void;
   onLogin: () => void;
 }
 
@@ -46,8 +48,6 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
   const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const isFileInput = tool.inputType === 'image' || tool.inputType === 'file';
-
-  const POINTS_PER_GENERATION = 5;
 
   // Determine max file size based on tool type for better UX and to avoid API errors
   const maxFileSize = (() => {
@@ -110,7 +110,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
     }
 
     if (mode === 'trial' && user && user.points < POINTS_PER_GENERATION) {
-        setError(t.not_enough_points_error.replace('{count}', user.points.toString()));
+        setError(t.not_enough_points_error.replace('{cost}', POINTS_PER_GENERATION.toString()).replace('{count}', user.points.toString()));
         return;
     }
     
@@ -136,7 +136,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
               const parsedResult: VideoOutput = JSON.parse(result.trim());
               setStructuredOutput(parsedResult);
               setOutputValue(''); // Don't show raw JSON
-              if (mode === 'trial') onDeductPoint();
+              if (mode === 'trial') onDeductPoint(POINTS_PER_GENERATION);
           } catch (jsonError) {
               console.error("Failed to parse JSON output:", jsonError, "Raw result:", result);
               setError(t.json_parse_error);
@@ -151,7 +151,7 @@ export const ToolInterface: React.FC<ToolInterfaceProps> = ({ tool, onClose, lan
           setOutputValue(result);
           setStructuredOutput(null);
           if (mode === 'trial') {
-              onDeductPoint();
+              onDeductPoint(POINTS_PER_GENERATION);
           }
       }
 
@@ -199,6 +199,19 @@ ${t.output_transcript.toUpperCase()}:\n${transcript}
   };
 
   const isOutputImage = (tool.id === 'image' || tool.id === 'image_bg_remover') && outputValue.startsWith('data:image');
+
+  const handleDownload = () => {
+    if (!isOutputImage || !outputValue) return;
+    const link = document.createElement('a');
+    link.href = outputValue;
+    const fileExtension = outputValue.startsWith('data:image/png') ? 'png' : 'jpeg';
+    const filename = `${tool.id}_${new Date().toISOString()}.${fileExtension}`;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
 
   const renderFileInput = () => (
     <div className="flex flex-col h-full">
@@ -295,6 +308,11 @@ ${t.output_transcript.toUpperCase()}:\n${transcript}
           <div className="flex justify-between items-center">
             <label className="font-semibold">{language === 'ar' ? 'النتيجة' : 'Output'}</label>
             <div className="flex gap-1">
+                {isOutputImage && outputValue && (
+                    <button onClick={handleDownload} title={t.download_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white">
+                        <SaveIcon />
+                    </button>
+                )}
                 {(outputValue || structuredOutput) && !isOutputImage && (
                     <>
                         <button onClick={handleCopy} title={isCopied ? t.copied_button : t.copy_button} className="p-1.5 rounded-md hover:bg-white/20 transition-colors text-white/70 hover:text-white">

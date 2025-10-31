@@ -150,10 +150,10 @@ export default function App() {
   };
 
 
-  const handleDeductPoint = async () => {
+  const handleDeductPoint = async (amount: number) => {
     if (user && mode === 'trial' && user.points > 0) {
         try {
-            const newPoints = await deductUserPoint(user.uid, user.points);
+            const newPoints = await deductUserPoint(user.uid, user.points, amount);
             setUser(prevUser => prevUser ? { ...prevUser, points: newPoints } : null);
         } catch (error) {
             console.error("Failed to deduct point:", error);

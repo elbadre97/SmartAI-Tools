@@ -29,7 +29,9 @@ const googleProvider = new GoogleAuthProvider();
 
 const getAuthErrorMessage = (errorCode: string, t: Record<string, string>): string => {
     switch (errorCode) {
-        case 'auth/unauthorized-domain': return t.error_unauthorized_domain;
+        case 'auth/unauthorized-domain':
+            const hostname = window.location.hostname || 'this domain';
+            return t.error_unauthorized_domain.replace('{hostname}', hostname);
         case 'auth/email-already-in-use': return t.error_email_in_use;
         case 'auth/weak-password': return t.error_weak_password;
         case 'auth/invalid-email': return t.error_invalid_email;

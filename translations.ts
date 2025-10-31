@@ -3,134 +3,135 @@ import type { Language } from './types';
 export const translations: Record<Language, Record<string, string>> = {
   ar: {
     // Header
-    header_title: 'أدوات ذكية',
+    header_title: 'الأدوات الذكية',
     nav_home: 'الرئيسية',
     nav_tools: 'الأدوات',
-    nav_features: 'المميزات',
+    nav_features: 'المزايا',
     lang_toggle: 'EN',
-    login: 'تسجيل الدخول',
-    logout: 'تسجيل الخروج',
+    login: 'ولوج',
+    logout: 'خروج',
     auth_disabled_tooltip: 'المصادقة معطلة في هذا الإصدار التجريبي',
 
     // Main Content
-    main_title: 'مجموعة أدوات الذكاء الاصطناعي الشاملة',
-    main_subtitle: 'عزز إبداعك وإنتاجيتك مع أحدث أدوات الذكاء الاصطناعي',
+    main_title: 'منصّتكم المتكاملة لأدوات الذكاء الاصطناعي',
+    main_subtitle: 'أطلق العنان لقدراتك الإبداعية والإنتاجية باستخدام أحدث تقنيات الذكاء الاصطناعي.',
 
     // Stats
-    stats_tools: 'أداة',
-    stats_categories: 'فئة',
-    stats_accuracy: 'دقة',
-    stats_availability: 'متاح',
+    stats_tools: 'أداة متاحة',
+    stats_categories: 'فئة رئيسية',
+    stats_accuracy: 'مستوى الدقة',
+    stats_availability: 'إتاحة الخدمة',
     
     // Tool Interface
-    generate_button: 'إنشاء',
+    generate_button: 'توليد',
     extract_text_button: 'استخراج وتحليل',
-    output_placeholder: 'ستظهر النتيجة هنا...',
+    output_placeholder: 'ستظهر النتائج هنا...',
     copy_button: 'نسخ',
     copied_button: 'تم النسخ!',
     clear_button: 'مسح',
     paste_button: 'لصق',
+    download_button: 'تحميل',
     close: 'إغلاق',
     upload_file: 'اختر ملفًا',
-    or_drop_file: 'أو اسحبه هنا',
+    or_drop_file: 'أو قم بسحبه وإفلاته هنا',
     image_preview: 'معاينة الصورة:',
     file_preview: 'معاينة الملف:',
     video_preview: 'معاينة الفيديو:',
     unsupported_file: 'نوع الملف غير مدعوم',
-    file_too_large: 'حجم الملف كبير جدًا. الحد الأقصى {size} ميجابايت.',
-    max_file_size: 'الحد الأقصى للحجم: {size} ميجابايت',
-    output_summary: 'الملخص',
-    output_topics: 'المواضيع الرئيسية',
+    file_too_large: 'حجم الملف يتجاوز الحد المسموح به ({size} ميجابايت).',
+    max_file_size: 'الحجم الأقصى للملف: {size} ميجابايت',
+    output_summary: 'الموجز',
+    output_topics: 'المواضيع المحورية',
     output_transcript: 'النص الكامل',
-    json_parse_error: 'حدث خطأ أثناء معالجة النتيجة. قد تكون استجابة الذكاء الاصطناعي غير صالحة.',
+    json_parse_error: 'حدث خطأ أثناء معالجة النتائج. قد تكون استجابة النموذج غير صالحة.',
 
     // Footer
-    footer_copyright: `© ${new Date().getFullYear()} أدوات ذكية. جميع الحقوق محفوظة.`,
-    footer_subtitle: 'مصنوع بحب باستخدام أحدث التقنيات 🤖',
+    footer_copyright: `© ${new Date().getFullYear()} الأدوات الذكية. جميع الحقوق محفوظة.`,
+    footer_subtitle: 'صُنعت بحب وشغف باستخدام أحدث التقنيات 🤖',
 
     // Login Modal
-    login_modal_title: 'أهلاً بك',
-    login_modal_subtitle: 'سجل الدخول للمتابعة وحفظ أعمالك.',
-    login_with_google: 'تسجيل الدخول باستخدام جوجل',
-    login_error: 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.',
+    login_modal_title: 'أهلاً بك مجدداً',
+    login_modal_subtitle: 'سجّل دخولك لمتابعة أعمالك والاستفادة من كامل المزايا.',
+    login_with_google: 'المتابعة باستخدام جوجل',
+    login_error: 'حدث خطأ أثناء محاولة الولوج. يرجى المحاولة مرة أخرى.',
     auth_not_configured: 'خدمة المصادقة غير مهيأة حاليًا.',
     auth_api_not_enabled_error: 'خطأ في الإعداد: خدمة المصادقة (Identity Toolkit API) غير مفعلة لهذا المشروع. يرجى تفعيلها من',
     auth_api_not_enabled_error_link_text: 'Google Cloud Console',
-    login_with_email: 'تسجيل الدخول بالبريد الإلكتروني',
+    login_with_email: 'الولوج بالبريد الإلكتروني',
     register: 'إنشاء حساب جديد',
-    name: 'الاسم',
+    name: 'الاسم الكامل',
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
-    sign_in_button: 'تسجيل الدخول',
-    sign_up_button: 'إنشاء حساب',
+    sign_in_button: 'ولوج',
+    sign_up_button: 'إنشاء الحساب',
     or_separator: 'أو',
-    no_account_prompt: 'ليس لديك حساب؟',
+    no_account_prompt: 'لا تملك حسابًا؟',
     have_account_prompt: 'هل لديك حساب بالفعل؟',
-    sign_in_link: 'سجل الدخول',
+    sign_in_link: 'ولوج',
     sign_up_link: 'أنشئ حسابًا',
     name_required: 'الاسم مطلوب',
-    error_email_in_use: 'هذا البريد الإلكتروني مستخدم بالفعل.',
+    error_email_in_use: 'هذا البريد الإلكتروني مسجل بالفعل.',
     error_weak_password: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.',
-    error_invalid_email: 'الرجاء إدخال بريد إلكتروني صالح.',
-    error_user_not_found: 'لم يتم العثور على حساب بهذا البريد الإلكتروني.',
-    error_wrong_password: 'كلمة مرور غير صحيحة. يرجى المحاولة مرة أخرى.',
+    error_invalid_email: 'الرجاء إدخال عنوان بريد إلكتروني صالح.',
+    error_user_not_found: 'لم يتم العثور على حساب مرتبط بهذا البريد الإلكتروني.',
+    error_wrong_password: 'كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.',
     error_generic_signup: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.',
-    error_generic_signin: 'حدث خطأ أثناء تسجيل الدخول. يرجى التحقق من بياناتك.',
-    error_unauthorized_domain: 'النطاق الحالي غير مصرح له بتنفيذ عمليات المصادقة. يرجى إضافته إلى إعدادات مشروع Firebase الخاص بك.',
+    error_generic_signin: 'حدث خطأ أثناء الولوج. يرجى التحقق من بياناتك.',
+    error_unauthorized_domain: 'النطاق ({hostname}) غير مصرح له بعمليات المصادقة. يرجى إضافته إلى قائمة النطاقات المعتمدة في إعدادات مشروع Firebase.',
     
     // Modes
     mode: 'وضع التشغيل',
     mode_trial: 'الوضع التجريبي',
-    mode_trial_desc: '30 محاولة مجانية يوميًا للحسابات المسجلة.',
+    mode_trial_desc: 'رصيد يومي مجاني للحسابات المسجلة.',
     mode_user_api: 'مفتاحك الخاص',
-    mode_user_api_desc: 'استخدام غير محدود مع مفتاح Gemini API الخاص بك.',
-    mode_premium: 'الاشتراك المدفوع',
-    mode_premium_desc: 'قوة كاملة وميزات حصرية.',
+    mode_user_api_desc: 'استخدام غير محدود عبر مفتاح Gemini API الخاص بك.',
+    mode_premium: 'الاشتراك المميز',
+    mode_premium_desc: 'قدرات كاملة ومزايا حصرية.',
 
     // API Key Modal
-    api_key_modal_title: 'إضافة مفتاح Gemini API',
-    api_key_modal_subtitle: 'أضف مفتاحك الخاص لاستخدام غير محدود. مفتاحك يُحفظ في متصفحك فقط.',
-    api_key_placeholder: 'الصق مفتاح API هنا...',
+    api_key_modal_title: 'إدارة مفتاح Gemini API',
+    api_key_modal_subtitle: 'أضف مفتاحك الخاص للاستخدام غير المحدود. يتم حفظ المفتاح محلياً في متصفحك فقط.',
+    api_key_placeholder: 'الصق مفتاح الواجهة البرمجية (API Key) هنا...',
     save_api_key: 'حفظ المفتاح',
     clear_api_key: 'إزالة المفتاح',
-    api_key_saved: 'تم حفظ المفتاح!',
-    api_key_needed_for_user_mode: 'لاستخدام هذا الوضع، يرجى إضافة مفتاح Gemini API الخاص بك.',
+    api_key_saved: 'تم الحفظ بنجاح!',
+    api_key_needed_for_user_mode: 'لتفعيل هذا الوضع، يرجى إضافة مفتاح Gemini API الخاص بك.',
     api_key_get_yours: 'احصل على مفتاحك من Google AI Studio',
     
     // Subscription & Payment Modal
-    subscription_modal_title: 'الترقية إلى الاشتراك المدفوع',
+    subscription_modal_title: 'الترقية إلى الباقة المميزة',
     subscription_modal_subtitle: 'أطلق العنان للإمكانيات الكاملة لأدوات الذكاء الاصطناعي.',
     premium_feature_1: 'استخدام غير محدود لجميع الأدوات',
-    premium_feature_2: 'سرعة استجابة أعلى',
-    premium_feature_3: 'وصول مبكر للأدوات الجديدة',
-    premium_feature_4: 'دعم فني ذو أولوية',
+    premium_feature_2: 'أولوية في سرعة الاستجابة والمعالجة',
+    premium_feature_3: 'وصول مبكر للأدوات والمزايا الجديدة',
+    premium_feature_4: 'دعم فني مخصص',
     price_per_month: 'شهريًا',
     subscribe_now_button: 'اشترك الآن مقابل 10$ / شهر',
-    subscription_success_alert: 'شكرًا لاشتراكك! (هذه مجرد محاكاة)',
-    payment_modal_title: 'إتمام الدفع',
-    choose_payment_method: 'اختر طريقة الدفع',
-    pay_with_paypal: 'الدفع بواسطة PayPal',
-    pay_with_card: 'الدفع بالبطاقة',
-    pay_with_woocommerce: 'الدفع بواسطة WooCommerce',
+    subscription_success_alert: 'شكرًا لانضمامك! (هذه عملية محاكاة لأغراض العرض)',
+    payment_modal_title: 'إتمام عملية الدفع',
+    choose_payment_method: 'اختر وسيلة الدفع',
+    pay_with_paypal: 'الدفع عبر PayPal',
+    pay_with_card: 'البطاقة الائتمانية',
+    pay_with_woocommerce: 'الدفع عبر WooCommerce',
     card_number: 'رقم البطاقة',
     expiry_date: 'تاريخ الانتهاء',
     cvc: 'CVC',
-    mm_yy: 'MM/YY',
+    mm_yy: 'شهر/سنة',
     confirm_payment_button: 'تأكيد الدفع (10$)',
     proceed_to_paypal: 'المتابعة إلى PayPal',
     proceed_to_woocommerce: 'المتابعة إلى WooCommerce',
     processing_payment: 'جاري معالجة الدفع...',
     back_button: 'رجوع',
-    invalid_card_number: 'رقم البطاقة غير صالح',
-    invalid_expiry_date: 'تاريخ الانتهاء غير صالح',
-    invalid_cvc: 'CVC غير صالح',
+    invalid_card_number: 'رقم البطاقة المدخل غير صالح.',
+    invalid_expiry_date: 'تاريخ الانتهاء غير صالح.',
+    invalid_cvc: 'رمز التحقق (CVC) غير صالح.',
     payment_redirect_message: 'سيتم توجيهك إلى {service} لإتمام عملية الدفع.',
 
 
     // Points
-    points_remaining: 'النقاط: {count}',
-    no_points_error: 'لقد استنفدت نقاطك لهذا اليوم. يمكنك العودة غدًا أو التبديل إلى وضع "مفتاحك الخاص".',
-    not_enough_points_error: 'تحتاج إلى 5 نقاط على الأقل للإنشاء. رصيدك الحالي {count} نقطة.',
+    points_remaining: 'الرصيد: {count} نقطة',
+    no_points_error: 'لقد استنفدت رصيدك اليومي. يتجدد الرصيد كل 24 ساعة، أو يمكنك التبديل إلى وضع "مفتاحك الخاص".',
+    not_enough_points_error: 'رصيدك الحالي {count} نقطة. هذه العملية تتطلب {cost} نقاط على الأقل.',
 
   },
   en: {
@@ -162,6 +163,7 @@ export const translations: Record<Language, Record<string, string>> = {
     copied_button: 'Copied!',
     clear_button: 'Clear',
     paste_button: 'Paste',
+    download_button: 'Download',
     close: 'Close',
     upload_file: 'Choose a file',
     or_drop_file: 'or drag it here',
@@ -208,12 +210,12 @@ export const translations: Record<Language, Record<string, string>> = {
     error_wrong_password: 'Incorrect password. Please try again.',
     error_generic_signup: 'An error occurred during sign-up. Please try again.',
     error_generic_signin: 'An error occurred during sign-in. Please check your credentials.',
-    error_unauthorized_domain: 'This website\'s domain is not authorized for authentication. Please add it to the authorized domains list in your Firebase project.',
+    error_unauthorized_domain: "This website's domain ({hostname}) is not authorized for authentication. Please add it to the authorized domains list in your Firebase project.",
 
     // Modes
     mode: 'Mode',
     mode_trial: 'Trial Mode',
-    mode_trial_desc: '30 free daily credits for registered accounts.',
+    mode_trial_desc: 'Free daily credits for registered accounts.',
     mode_user_api: 'Your API Key',
     mode_user_api_desc: 'Unlimited usage with your own Gemini API key.',
     mode_premium: 'Premium',
@@ -261,6 +263,6 @@ export const translations: Record<Language, Record<string, string>> = {
     // Points
     points_remaining: 'Credits: {count}',
     no_points_error: 'You have run out of credits for today. You can come back tomorrow or switch to "Your API Key" mode.',
-    not_enough_points_error: 'You need at least 5 points to generate. You currently have {count} points.',
+    not_enough_points_error: 'You need at least {cost} credits to generate. You currently have {count} credits.',
   },
 };

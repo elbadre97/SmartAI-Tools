@@ -1,6 +1,8 @@
 import React from 'react';
 
-const IconWrapper = ({ children, className = "h-6 w-6" }: { children: React.ReactNode, className?: string }) => (
+// FIX: The original component signature was causing a TypeScript error where the `children` prop
+// was not being recognized. Using React.PropsWithChildren correctly types the component to accept children from JSX.
+const IconWrapper = ({ children, className = "h-6 w-6" }: React.PropsWithChildren<{ className?: string }>) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         {children}
     </svg>

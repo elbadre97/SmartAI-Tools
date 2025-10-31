@@ -1,5 +1,7 @@
 import type { Category, Tool } from './types';
 
+export const POINTS_PER_GENERATION = 5;
+
 export const CATEGORIES: Category[] = [
   {
     id: 'content',
