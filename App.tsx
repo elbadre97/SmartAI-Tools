@@ -69,25 +69,32 @@ export default function App() {
     }
     
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      if (firebaseUser) {
-        let userProfile = await getUserProfile(firebaseUser.uid);
-        if (!userProfile) {
-          userProfile = await createUserProfile(firebaseUser.uid, firebaseUser.displayName || undefined);
+      try {
+        if (firebaseUser) {
+          let userProfile = await getUserProfile(firebaseUser.uid);
+          if (!userProfile) {
+            userProfile = await createUserProfile(firebaseUser.uid, firebaseUser.displayName || undefined);
+          }
+          const displayName = firebaseUser.displayName || userProfile?.displayName;
+          const appUser: User = {
+            uid: firebaseUser.uid,
+            name: { ar: displayName || 'مستخدم', en: displayName || 'User' },
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
+            points: userProfile.points ?? 0, // FIX: Provide a fallback to prevent crashes if points are missing.
+          };
+          setUser(appUser);
+        } else {
+          setUser(null);
+          setMode('trial'); // Default to trial if logged out
         }
-        const displayName = firebaseUser.displayName || userProfile?.displayName;
-        const appUser: User = {
-          uid: firebaseUser.uid,
-          name: { ar: displayName || 'مستخدم', en: displayName || 'User' },
-          email: firebaseUser.email || '',
-          photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
-          points: userProfile.points,
-        };
-        setUser(appUser);
-      } else {
-        setUser(null);
-        setMode('trial'); // Default to trial if logged out
+      } catch (error) {
+        console.error("Error during authentication state change:", error);
+        setUser(null); // Reset user state on error
+        setMode('trial');
+      } finally {
+        setAuthInitialized(true); // FIX: Ensure initialization is always marked as complete.
       }
-      setAuthInitialized(true);
     });
     
     return () => unsubscribe();
