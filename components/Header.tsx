@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={onLogin}
                     disabled={!isAuthEnabled}
-                    className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-gradient-to-r from-teal-400 to-blue-500 text-white font-bold px-5 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-500 disabled:to-gray-600"
                     title={!isAuthEnabled ? t.auth_disabled_tooltip : ''}
                   >
                     {t.login}
