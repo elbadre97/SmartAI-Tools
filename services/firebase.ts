@@ -1,11 +1,20 @@
 // services/firebase.ts
 import * as firebaseApp from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { 
+  getAuth, 
+  type Auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  type UserCredential
+} from "firebase/auth";
 import { getFirestore, type Firestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, type Timestamp } from "firebase/firestore";
 import type { UserProfileData } from '../types';
 
+// FIX: Reverted to hardcoded Firebase config to resolve initialization errors
+// in environments where environment variables are not set.
 const firebaseConfig = {
-  apiKey: "AIzaSyCqewW88AVmKF9vXcf1ytmbHDZglUARC4I",
+  apiKey: "AIzaSyDrsQpMlzjcFjUY8YBbikig1EPenBhL8WY",
   authDomain: "smartai-tools.firebaseapp.com",
   projectId: "smartai-tools",
   storageBucket: "smartai-tools.firebasestorage.app",
@@ -24,6 +33,22 @@ try {
 } catch (error) {
   console.error("Firebase initialization failed:", error);
 }
+
+// --- New Auth Functions ---
+
+export const signUpWithEmailPassword = async (name: string, email: string, password: string): Promise<UserCredential> => {
+    if (!auth) throw new Error("Auth not initialized");
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // After creating the user, update their profile with the name
+    await updateProfile(userCredential.user, { displayName: name });
+    return userCredential;
+};
+
+export const signInWithEmailPassword = async (email: string, password: string): Promise<UserCredential> => {
+    if (!auth) throw new Error("Auth not initialized");
+    return await signInWithEmailAndPassword(auth, email, password);
+};
+
 
 // --- User Profile Service Functions ---
 
