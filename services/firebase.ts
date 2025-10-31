@@ -39,8 +39,10 @@ try {
 export const signUpWithEmailPassword = async (name: string, email: string, password: string): Promise<UserCredential> => {
     if (!auth) throw new Error("Auth not initialized");
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // After creating the user, update their profile with the name
+    // After creating the user, update their auth profile with the name
     await updateProfile(userCredential.user, { displayName: name });
+    // Also create their Firestore profile document to prevent race conditions on first load
+    await createUserProfile(userCredential.user.uid, name);
     return userCredential;
 };
 
@@ -83,16 +85,17 @@ export const getUserProfile = async (uid: string): Promise<UserProfileData | nul
     }
 };
 
-export const createUserProfile = async (uid: string): Promise<UserProfileData> => {
+export const createUserProfile = async (uid: string, name?: string): Promise<UserProfileData> => {
     if (!db) throw new Error("Firestore not initialized");
     const newUserProfile = { // Explicitly define the object shape for setDoc
         points: DAILY_POINTS,
         lastPointsReset: serverTimestamp(),
+        displayName: name || null,
     };
     const userDocRef = doc(db, 'users', uid);
     await setDoc(userDocRef, newUserProfile);
     // Return a UserProfileData compliant object with a JS Date for local state
-    return { points: DAILY_POINTS, lastPointsReset: new Date() };
+    return { points: DAILY_POINTS, lastPointsReset: new Date(), displayName: name };
 };
 
 export const deductUserPoint = async (uid: string, currentPoints: number): Promise<number> => {

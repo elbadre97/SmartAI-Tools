@@ -9,7 +9,7 @@ import { LoginModal } from './components/LoginModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { TOOLS, CATEGORIES } from './constants';
-import type { Tool, Language, CategoryType, User, AppMode } from './types';
+import type { Tool, Language, CategoryType, User, AppMode, UserProfileData } from './types';
 import { translations } from './translations';
 import { auth, getUserProfile, createUserProfile, deductUserPoint } from './services/firebase';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
@@ -64,13 +64,19 @@ export default function App() {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
         if (firebaseUser) {
           let userProfile = await getUserProfile(firebaseUser.uid);
+          
+          // If a user is authenticated but has no profile in Firestore (e.g., first-time Google sign-in), create one.
           if (!userProfile) {
-            userProfile = await createUserProfile(firebaseUser.uid);
+            userProfile = await createUserProfile(firebaseUser.uid, firebaseUser.displayName || undefined);
           }
           
+          // Use the displayName from the auth profile, but fall back to the one from our database.
+          // This solves the race condition where the auth profile isn't updated instantly after sign-up.
+          const displayName = firebaseUser.displayName || userProfile?.displayName;
+
           const appUser: User = {
             uid: firebaseUser.uid,
-            name: { ar: firebaseUser.displayName || 'مستخدم', en: firebaseUser.displayName || 'User' },
+            name: { ar: displayName || 'مستخدم', en: displayName || 'User' },
             email: firebaseUser.email || '',
             photoURL: firebaseUser.photoURL || 'https://avatar.iran.liara.run/public/boy',
             points: userProfile.points,
