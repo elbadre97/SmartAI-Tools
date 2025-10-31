@@ -13,7 +13,6 @@ const ModeIcon = ({ mode }: { mode: AppMode }) => {
     switch (mode) {
         case 'trial': return <span className="text-xl">💎</span>;
         case 'user_api': return <span className="text-xl">🔑</span>;
-        case 'premium': return <span className="text-xl">✨</span>;
         default: return null;
     }
 }
@@ -25,7 +24,6 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({ mode, onModeChange, 
   const modes: { id: AppMode; title: string; desc: string; }[] = [
     { id: 'trial', title: t.mode_trial, desc: t.mode_trial_desc },
     { id: 'user_api', title: t.mode_user_api, desc: t.mode_user_api_desc },
-    { id: 'premium', title: t.mode_premium, desc: t.mode_premium_desc },
   ];
 
   const currentModeDetails = modes.find(m => m.id === mode) || modes[0];

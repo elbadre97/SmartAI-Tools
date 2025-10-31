@@ -11,6 +11,8 @@ export const translations: Record<Language, Record<string, string>> = {
     login: 'ولوج',
     logout: 'خروج',
     auth_disabled_tooltip: 'المصادقة معطلة في هذا الإصدار التجريبي',
+    subscribe_button: 'الترقية للاشتراك المميز',
+
 
     // Main Content
     main_title: 'منصّتكم المتكاملة لأدوات الذكاء الاصطناعي',
@@ -79,59 +81,21 @@ export const translations: Record<Language, Record<string, string>> = {
     error_generic_signin: 'حدث خطأ أثناء الولوج. يرجى التحقق من بياناتك.',
     error_unauthorized_domain: 'النطاق ({hostname}) غير مصرح له بعمليات المصادقة. يرجى إضافته إلى قائمة النطاقات المعتمدة في إعدادات مشروع Firebase.',
     
-    // Modes
-    mode: 'وضع التشغيل',
-    mode_trial: 'الوضع التجريبي',
-    mode_trial_desc: 'رصيد يومي مجاني للحسابات المسجلة.',
-    mode_user_api: 'مفتاحك الخاص',
-    mode_user_api_desc: 'استخدام غير محدود عبر مفتاح Gemini API الخاص بك.',
-    mode_premium: 'الاشتراك المميز',
-    mode_premium_desc: 'قدرات كاملة ومزايا حصرية.',
-
-    // API Key Modal
-    api_key_modal_title: 'إدارة مفتاح Gemini API',
-    api_key_modal_subtitle: 'أضف مفتاحك الخاص للاستخدام غير المحدود. يتم حفظ المفتاح محلياً في متصفحك فقط.',
-    api_key_placeholder: 'الصق مفتاح الواجهة البرمجية (API Key) هنا...',
-    save_api_key: 'حفظ المفتاح',
-    clear_api_key: 'إزالة المفتاح',
-    api_key_saved: 'تم الحفظ بنجاح!',
-    api_key_needed_for_user_mode: 'لتفعيل هذا الوضع، يرجى إضافة مفتاح Gemini API الخاص بك.',
-    api_key_get_yours: 'احصل على مفتاحك من Google AI Studio',
-    
-    // Subscription & Payment Modal
-    subscription_modal_title: 'الترقية إلى الباقة المميزة',
-    subscription_modal_subtitle: 'أطلق العنان للإمكانيات الكاملة لأدوات الذكاء الاصطناعي.',
-    premium_feature_1: 'استخدام غير محدود لجميع الأدوات',
-    premium_feature_2: 'أولوية في سرعة الاستجابة والمعالجة',
-    premium_feature_3: 'وصول مبكر للأدوات والمزايا الجديدة',
-    premium_feature_4: 'دعم فني مخصص',
-    price_per_month: 'شهريًا',
-    subscribe_now_button: 'اشترك الآن مقابل 10$ / شهر',
-    subscription_success_alert: 'شكرًا لانضمامك! (هذه عملية محاكاة لأغراض العرض)',
-    payment_modal_title: 'إتمام عملية الدفع',
-    choose_payment_method: 'اختر وسيلة الدفع',
-    pay_with_paypal: 'الدفع عبر PayPal',
-    pay_with_card: 'البطاقة الائتمانية',
-    pay_with_woocommerce: 'الدفع عبر WooCommerce',
-    card_number: 'رقم البطاقة',
-    expiry_date: 'تاريخ الانتهاء',
-    cvc: 'CVC',
-    mm_yy: 'شهر/سنة',
-    confirm_payment_button: 'تأكيد الدفع (10$)',
-    proceed_to_paypal: 'المتابعة إلى PayPal',
-    proceed_to_woocommerce: 'المتابعة إلى WooCommerce',
-    processing_payment: 'جاري معالجة الدفع...',
-    back_button: 'رجوع',
-    invalid_card_number: 'رقم البطاقة المدخل غير صالح.',
-    invalid_expiry_date: 'تاريخ الانتهاء غير صالح.',
-    invalid_cvc: 'رمز التحقق (CVC) غير صالح.',
-    payment_redirect_message: 'سيتم توجيهك إلى {service} لإتمام عملية الدفع.',
-
-
     // Points
     points_remaining: 'الرصيد: {count} نقطة',
-    no_points_error: 'لقد استنفدت رصيدك اليومي. يتجدد الرصيد كل 24 ساعة، أو يمكنك التبديل إلى وضع "مفتاحك الخاص".',
+    no_points_error: 'لقد استنفدت رصيدك اليومي. يتجدد الرصيد كل 24 ساعة.',
     not_enough_points_error: 'رصيدك الحالي {count} نقطة. هذه العملية تتطلب {cost} نقاط على الأقل.',
+
+    // Subscription Modal
+    subscription_modal_title: 'الترقية للاشتراك المميز',
+    subscription_modal_subtitle: 'أطلق العنان للإمكانيات الكاملة مع باقتنا المميزة.',
+    premium_feature_1: 'استخدام غير محدود لجميع الأدوات',
+    premium_feature_2: 'نقاط لا نهائية',
+    premium_feature_3: 'أولوية الوصول للميزات الجديدة',
+    premium_feature_4: 'دعم فني متميز',
+    price_per_month: 'شهرياً',
+    subscribe_now_button: 'اشترك الآن',
+
 
   },
   en: {
@@ -144,6 +108,7 @@ export const translations: Record<Language, Record<string, string>> = {
     login: 'Login',
     logout: 'Logout',
     auth_disabled_tooltip: 'Authentication is disabled in this demo build',
+    subscribe_button: 'Go Premium',
 
     // Main Content
     main_title: 'Your All-in-One AI Toolkit',
@@ -211,58 +176,21 @@ export const translations: Record<Language, Record<string, string>> = {
     error_generic_signup: 'An error occurred during sign-up. Please try again.',
     error_generic_signin: 'An error occurred during sign-in. Please check your credentials.',
     error_unauthorized_domain: "This website's domain ({hostname}) is not authorized for authentication. Please add it to the authorized domains list in your Firebase project.",
-
-    // Modes
-    mode: 'Mode',
-    mode_trial: 'Trial Mode',
-    mode_trial_desc: 'Free daily credits for registered accounts.',
-    mode_user_api: 'Your API Key',
-    mode_user_api_desc: 'Unlimited usage with your own Gemini API key.',
-    mode_premium: 'Premium',
-    mode_premium_desc: 'Full power and exclusive features.',
-
-    // API Key Modal
-    api_key_modal_title: 'Add Your Gemini API Key',
-    api_key_modal_subtitle: 'Add your own key for unlimited usage. Your key is saved only in your browser.',
-    api_key_placeholder: 'Paste your API key here...',
-    save_api_key: 'Save Key',
-    clear_api_key: 'Remove Key',
-    api_key_saved: 'Key Saved!',
-    api_key_needed_for_user_mode: 'To use this mode, please add your Gemini API key.',
-    api_key_get_yours: 'Get your key from Google AI Studio',
     
-    // Subscription & Payment Modal
-    subscription_modal_title: 'Upgrade to Premium',
-    subscription_modal_subtitle: 'Unlock the full potential of AI tools.',
-    premium_feature_1: 'Unlimited usage of all tools',
-    premium_feature_2: 'Faster response times',
-    premium_feature_3: 'Early access to new tools',
-    premium_feature_4: 'Priority customer support',
-    price_per_month: 'per month',
-    subscribe_now_button: 'Subscribe Now for $10 / month',
-    subscription_success_alert: 'Thank you for subscribing! (This is a simulation)',
-    payment_modal_title: 'Complete Payment',
-    choose_payment_method: 'Choose Payment Method',
-    pay_with_paypal: 'Pay with PayPal',
-    pay_with_card: 'Pay with Card',
-    pay_with_woocommerce: 'Pay with WooCommerce',
-    card_number: 'Card Number',
-    expiry_date: 'Expiry Date',
-    cvc: 'CVC',
-    mm_yy: 'MM/YY',
-    confirm_payment_button: 'Confirm Payment ($10)',
-    proceed_to_paypal: 'Proceed to PayPal',
-    proceed_to_woocommerce: 'Proceed to WooCommerce',
-    processing_payment: 'Processing Payment...',
-    back_button: 'Back',
-    invalid_card_number: 'Invalid card number',
-    invalid_expiry_date: 'Invalid expiry date',
-    invalid_cvc: 'Invalid CVC',
-    payment_redirect_message: 'You will be redirected to {service} to complete your payment.',
-
     // Points
     points_remaining: 'Credits: {count}',
-    no_points_error: 'You have run out of credits for today. You can come back tomorrow or switch to "Your API Key" mode.',
+    no_points_error: 'You have run out of credits for today. You can come back tomorrow.',
     not_enough_points_error: 'You need at least {cost} credits to generate. You currently have {count} credits.',
+
+    // Subscription Modal
+    subscription_modal_title: 'Upgrade to Premium',
+    subscription_modal_subtitle: 'Unlock the full potential with our premium plan.',
+    premium_feature_1: 'Unlimited usage of all tools',
+    premium_feature_2: 'Infinite points',
+    premium_feature_3: 'Priority access to new features',
+    premium_feature_4: 'Premium customer support',
+    price_per_month: 'per month',
+    subscribe_now_button: 'Subscribe Now',
+
   },
 };

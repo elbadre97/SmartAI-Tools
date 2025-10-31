@@ -6,15 +6,12 @@ import { Footer } from './components/Footer';
 import { Stats } from './components/Stats';
 import { CategoryTabs } from './components/CategoryTabs';
 import { LoginModal } from './components/LoginModal';
-import { ApiKeyModal } from './components/ApiKeyModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { TOOLS, CATEGORIES } from './constants';
-import type { Tool, Language, CategoryType, User, AppMode, UserProfileData } from './types';
+import type { Tool, Language, CategoryType, User, AppMode } from './types';
 import { translations } from './translations';
 import { auth, getUserProfile, createUserProfile, deductUserPoint } from './services/firebase';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
-
-const USER_API_KEY_STORAGE_KEY = 'smartai-user-api-key';
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -23,14 +20,10 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>(CATEGORIES[0].id);
   const [user, setUser] = useState<User | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [authInitialized, setAuthInitialized] = useState(false);
-  
-  const [mode, setMode] = useState<AppMode>('trial');
-  const [userApiKey, setUserApiKey] = useState<string | null>(null);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
-
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const [mode, setMode] = useState<AppMode>('trial');
+  
   const isAuthEnabled = !!auth;
 
   useEffect(() => {
@@ -48,23 +41,11 @@ export default function App() {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
 
-  useEffect(() => {
-    try {
-        const storedKey = localStorage.getItem(USER_API_KEY_STORAGE_KEY);
-        if (storedKey) {
-            setUserApiKey(storedKey);
-        }
-    } catch (error) {
-        console.error("Could not read user API key from local storage:", error);
-    }
-  }, []);
-
   // Effect to handle Firebase auth state changes.
   useEffect(() => {
     if (!isAuthEnabled || !auth) {
       setAuthInitialized(true);
       setUser(null);
-      setMode('trial');
       return;
     }
     
@@ -86,12 +67,10 @@ export default function App() {
           setUser(appUser);
         } else {
           setUser(null);
-          setMode('trial'); // Default to trial if logged out
         }
       } catch (error) {
         console.error("Error during authentication state change:", error);
         setUser(null); // Reset user state on error
-        setMode('trial');
       } finally {
         setAuthInitialized(true); // FIX: Ensure initialization is always marked as complete.
       }
@@ -100,58 +79,8 @@ export default function App() {
     return () => unsubscribe();
   }, [isAuthEnabled]);
 
-  // Effect to handle pending mode changes after authentication.
-  useEffect(() => {
-    // If a user has logged in and there was a pending mode change, trigger it now.
-    if (user && pendingMode) {
-      handleModeChange(pendingMode);
-      setPendingMode(null);
-    }
-  }, [user, pendingMode]);
-
-  const handleSetUserApiKey = (key: string) => {
-    const newKey = key.trim();
-    if (newKey) {
-        setUserApiKey(newKey);
-        localStorage.setItem(USER_API_KEY_STORAGE_KEY, newKey);
-        if (pendingMode === 'user_api') {
-            setMode('user_api');
-            setPendingMode(null);
-        }
-    } else {
-        setUserApiKey(null);
-        localStorage.removeItem(USER_API_KEY_STORAGE_KEY);
-        if (mode === 'user_api') setMode('trial'); // Revert to trial if key is removed
-    }
-  };
-
-  const handleModeChange = (newMode: AppMode) => {
-    // For modes that require a user to be logged in
-    if ((newMode === 'premium' || newMode === 'trial') && !user) {
-        setPendingMode(newMode);
-        setIsLoginModalOpen(true);
-        return;
-    }
-    // For modes that require an API key
-    if (newMode === 'user_api' && !userApiKey) {
-        setPendingMode('user_api');
-        setIsApiKeyModalOpen(true);
-        return;
-    }
-    // For premium mode, open subscription modal
-    if (newMode === 'premium') {
-        setIsSubscriptionModalOpen(true);
-        // The mode is set in the onSubscribe callback, not here.
-        return;
-    }
-    // For other modes, set directly
-    setMode(newMode);
-    setPendingMode(null);
-  };
-
-
   const handleDeductPoint = async (amount: number) => {
-    if (user && mode === 'trial' && user.points > 0) {
+    if (user && user.points > 0) {
         try {
             const newPoints = await deductUserPoint(user.uid, user.points, amount);
             setUser(prevUser => prevUser ? { ...prevUser, points: newPoints } : null);
@@ -176,12 +105,18 @@ export default function App() {
   const handleLogin = () => {
     if (isAuthEnabled) setIsLoginModalOpen(true);
   };
+  
+  const handleSubscribe = () => {
+    setMode('premium');
+    setIsSubscriptionModalOpen(false);
+  };
 
   const handleLogout = async () => {
     if (!isAuthEnabled || !auth) return;
     try {
       await signOut(auth);
-      // onAuthStateChanged will handle setting user to null and mode
+      setMode('trial');
+      // onAuthStateChanged will handle setting user to null
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -200,12 +135,11 @@ export default function App() {
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        onSubscribe={() => setIsSubscriptionModalOpen(true)}
         authInitialized={authInitialized}
         isAuthEnabled={isAuthEnabled}
-        t={t}
         mode={mode}
-        onModeChange={handleModeChange}
-        userApiKey={userApiKey}
+        t={t}
       />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="text-center mb-10 md:mb-16">
@@ -231,7 +165,7 @@ export default function App() {
                 language={language} 
                 t={t}
                 mode={mode}
-                userApiKey={userApiKey}
+                userApiKey={null}
                 user={user}
                 onDeductPoint={handleDeductPoint}
                 onLogin={handleLogin}
@@ -248,35 +182,20 @@ export default function App() {
         <LoginModal 
           onClose={() => {
             setIsLoginModalOpen(false);
-            setPendingMode(null); // Clear pending action if user closes the modal
           }}
           t={t}
           language={language}
         />
       )}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => {
-            setIsApiKeyModalOpen(false);
-            setPendingMode(null);
-        }}
-        onSave={handleSetUserApiKey}
-        currentKey={userApiKey}
-        t={t}
-        language={language}
-      />
-      <SubscriptionModal
-        isOpen={isSubscriptionModalOpen}
-        onClose={() => setIsSubscriptionModalOpen(false)}
-        onSubscribe={() => {
-            // Placeholder for actual subscription logic
-            alert(t.subscription_success_alert);
-            setIsSubscriptionModalOpen(false);
-            setMode('premium'); // Set mode to premium after successful subscription
-        }}
-        t={t}
-        language={language}
-      />
+      {isSubscriptionModalOpen && (
+        <SubscriptionModal
+          isOpen={isSubscriptionModalOpen}
+          onClose={() => setIsSubscriptionModalOpen(false)}
+          onSubscribe={handleSubscribe}
+          t={t}
+          language={language}
+        />
+      )}
     </div>
   );
 }

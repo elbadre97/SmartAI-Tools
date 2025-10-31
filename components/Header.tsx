@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Language, User, AppMode } from '../types';
 import { UserMenu } from './UserMenu';
-import { ModeSelector } from './ModeSelector';
 
 interface HeaderProps {
   theme: 'light' | 'dark';
@@ -11,12 +10,11 @@ interface HeaderProps {
   user: User | null;
   onLogin: () => void;
   onLogout: () => void;
+  onSubscribe: () => void;
   authInitialized: boolean;
   isAuthEnabled: boolean;
-  t: Record<string, string>;
   mode: AppMode;
-  onModeChange: (mode: AppMode) => void;
-  userApiKey: string | null;
+  t: Record<string, string>;
 }
 
 const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
@@ -24,8 +22,7 @@ const ThemeIcon = ({ theme }: { theme: 'light' | 'dark' }) => (
 );
 
 export const Header: React.FC<HeaderProps> = ({ 
-    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, authInitialized, isAuthEnabled, t,
-    mode, onModeChange, userApiKey
+    theme, toggleTheme, language, toggleLanguage, user, onLogin, onLogout, onSubscribe, authInitialized, isAuthEnabled, mode, t
 }) => {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -61,15 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <ModeSelector 
-              mode={mode}
-              onModeChange={onModeChange}
-              language={language}
-              t={t}
-              userApiKey={userApiKey}
-            />
-            
-            {mode === 'trial' && user && (
+            {user && mode === 'trial' && (
               <div 
                 className="bg-white/10 text-sm font-semibold px-3 py-1.5 rounded-full flex items-center gap-2" 
                 title={t.points_remaining.replace('{count}', user.points.toString())}
@@ -102,12 +91,22 @@ export const Header: React.FC<HeaderProps> = ({
             {authInitialized && (
               <>
                 {user ? (
-                  <UserMenu user={user} onLogout={onLogout} t={t} language={language} />
+                  <>
+                    {mode === 'trial' && (
+                      <button
+                        onClick={onSubscribe}
+                        className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-full transition-all text-sm shadow-lg"
+                      >
+                        {t.subscribe_button}
+                      </button>
+                    )}
+                    <UserMenu user={user} onLogout={onLogout} t={t} language={language} mode={mode} />
+                  </>
                 ) : (
                   <button
                     onClick={onLogin}
                     disabled={!isAuthEnabled}
-                    className="bg-white/20 hover:bg-white/30 font-semibold px-4 py-2 rounded-full transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-indigo-500 hover:bg-indigo-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     title={!isAuthEnabled ? t.auth_disabled_tooltip : ''}
                   >
                     {t.login}
